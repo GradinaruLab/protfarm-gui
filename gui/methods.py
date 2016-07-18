@@ -1,9 +1,10 @@
+
+
 methods = {
 	'Perfect match': 
 		{
-		'Perfect param 1': 'Checkbutton',
-		'Perfect param 2': 'Checkbutton',
-		'Perfect param 3': 'Entry'
+		'Mismatch Quality Threshold': 'Entry',
+		'Variant Quality Threshold': 'Entry'
 		},
 	'BowTie': 
 		{
@@ -14,7 +15,7 @@ methods = {
 		},
 	'Mosaik': 
 		{
-		'Mosaik param 1': 'Checkbutton',
+		'Number of errors': 'Entry',
 		'Mosaik param 2': 'Checkbutton',
 		'Mosaik param 3': 'Entry',
 		'Mosaik param 4': 'Checkbutton'
