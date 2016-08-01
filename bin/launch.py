@@ -7,7 +7,7 @@ from gui.main import Application
 root = Tk()
 root.attributes('-zoomed', True)
 
-root.wm_title('CLOVERbot')
+root.wm_title('CLOVERpuff')
 
 app = Application(master=root)
 app.mainloop()
