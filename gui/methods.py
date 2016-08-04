@@ -1,5 +1,5 @@
 methods = {
-	'Perfect match': {
+	'Perfect_Match_Aligner': {
 		'short':'PM',
 		'parameters': {
 				'Mismatch Quality Threshold': {
@@ -12,7 +12,7 @@ methods = {
 				}
 			}
 		},
-	'BowTie': {
+	'Bowtie_Aligner': {
 		'short':'BT',
 		'parameters': {
 				'BowTie param 1': {
