@@ -4,10 +4,12 @@ methods = {
 		'parameters': {
 				'Mismatch Quality Threshold': {
 					'type':'Entry',
+					'datatype':'int',
 					'name':'mismatch_quality_threshold'
 				},
 				'Variant Quality Threshold': {
 					'type':'Entry',
+					'datatype':'int',
 					'name':'variant_sequence_quality_threshold'
 				}
 			}
@@ -25,6 +27,7 @@ methods = {
 				},
 				'Number of mistakes': {
 					'type':'Entry',
+					'datatype':'int',
 					'name':'bt3'
 				},
 				'Allow insertions/deletions': {
@@ -38,6 +41,7 @@ methods = {
 		'parameters': {
 				'Number of errors': {
 					'type':'Entry',
+					'datatype':'int',
 					'name':'ms1'
 				},
 				'Mosaik param 2': {
@@ -46,6 +50,7 @@ methods = {
 				},
 				'Mosaik param 3': {
 					'type':'Entry',
+					'datatype':'int',
 					'name':'ms3'
 				},
 				'Mosaik param 4': {
