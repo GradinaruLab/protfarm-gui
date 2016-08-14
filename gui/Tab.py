@@ -1,23 +1,23 @@
 from Tkinter import *
-import tkFileDialog
-from tkFileDialog import *
-import tkMessageBox
-import ttk
+# import tkFileDialog
+# from tkFileDialog import *
+# import tkMessageBox
+# import ttk
 import tkFont
 import sys
 import glob
 import os
 import threading
 from analysis import heat
-import methods
-import globals
-import re
-import numpy as np
+# import methods
+# import globals
+# import re
+# import numpy as np
 from workspace import Workspace as ws
-from workspace import Library as lb
-from workspace import Template as tp
-from workspace import Alignment as al
-from workspace import Database as db
+# from workspace import Library as lb
+# from workspace import Template as tp
+# from workspace import Alignment as al
+# from workspace import Database as db
 
 class Threaded_Aligner(threading.Thread):
  
