@@ -13,6 +13,7 @@ import methods
 import globals
 import re
 import numpy as np
+from analysis.Analysis_Set import Analysis_Set
 from workspace import Workspace as ws
 from workspace import Library as lb
 from workspace import Template as tp
@@ -25,6 +26,8 @@ class Analysis_Tab(Tab):
 	def __init__(self, master, **kwargs):
 		"""Initializes the current tab"""
 		Tab.__init__(self, master, **kwargs)
+
+		self.analysis_set = Analysis_Set()
 
 		self.main_frame = Frame(self, padx=10, pady=10, relief=GROOVE, bd=2)
 
@@ -87,8 +90,7 @@ class Analysis_Tab(Tab):
 		Grid.columnconfigure(self.specificity_frame, 1, weight=1)
 
 		browse_button = Button(self.specificity_frame, text = 'Browse \nLibraries',
-			command=lambda: self.display_libraries([self.libraries_to_compare,
-				self.libraries_of_interest]))
+			command=lambda: self.display_libraries([self.libraries_to_compare]))
 		browse_button.grid(row=1, column=0, sticky='ne')
 
 		self.specificity_frame.grid(row=2, column=0, sticky='news', pady=5, padx=5)
@@ -118,6 +120,8 @@ class Analysis_Tab(Tab):
 		"""
 		pass
 	def export_all(self):
+
+		self.analysis_set = Analysis_Set()
 		starting_library = self.starting_library_dd.var.get()
 		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
 		libraries_to_compare = [str(line.name) for line in self.libraries_to_compare.winfo_children()]
@@ -128,6 +132,13 @@ class Analysis_Tab(Tab):
 
 		if not (starting_library and libraries_of_interest and libraries_to_compare and threshold):
 			return
+		
+		for library in libraries_of_interest:
+			self.analysis_set.add_library(db.get_library(library))
+
+		filename = 'analysis.csv'
+		self.analysis_set.export_enrichment_specificity(filename,
+			starting_library, libraries_to_compare, count_threshold = self.count_threshold.get())
 		print 'starting',  starting_library
 		print 'Threshold', self.count_threshold.get()
 		print 'libraries_of_interest', libraries_of_interest
