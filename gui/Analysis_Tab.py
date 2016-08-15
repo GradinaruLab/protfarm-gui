@@ -21,6 +21,10 @@ from workspace import Alignment as al
 from workspace import Database as db
 from analysis import enrichment as enrichment_analysis
 from Tab import *
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 class Analysis_Tab(Tab):
 
@@ -143,19 +147,27 @@ class Analysis_Tab(Tab):
 		self.by_amino_acid_checkbox.grid(row=3, column=1, sticky='w',
 			padx=5, pady=5)
 
-		self.export_btn = Button(self.main_frame, text='Export All to CSV',
+
+		nice_button_wrapper = Frame(self.main_frame)
+		self.generate_heatmap_btn = Button(nice_button_wrapper, text='Heatmap',
+			command=self.heatmap)
+		self.generate_heatmap_btn.grid(row=0, column=0)
+
+		self.export_btn = Button(nice_button_wrapper, text='Export All to CSV',
 			command= self.export_all)
 
-		self.export_btn.grid(row=4, column=3, sticky='se', padx=5, pady=5)
+		self.export_btn.grid(row=2, column=0, sticky='se', padx=5, pady=5)
 
 		self.plot_enrichment_distribution_btn = \
-			Button(self.main_frame, text='Plot enrichment distribution', \
+			Button(nice_button_wrapper, text='Plot enrichment distribution', \
 				command= self.plot_enrichment_distribution)
 
-		self.plot_enrichment_distribution_btn.grid(row=3, column = 3,
+		self.plot_enrichment_distribution_btn.grid(row=1, column = 0,
 			sticky='se', padx=5, pady = 5)
 
 		Grid.columnconfigure(self, 0, weight=1)		
+		nice_button_wrapper.grid(column=3, row=3, sticky='se', padx=5, pady=5)
+
 		self.main_frame.grid(column=0, row=0, sticky='news')
 
 
@@ -250,7 +262,8 @@ class Analysis_Tab(Tab):
 		self.library_window = Toplevel()
 		self.library_window.title('Libraries')
 
-		old_list = [str(line.name) for box in listboxes for line in box.winfo_children()]
+		old_list = [str(line.name) for box in listboxes for line in \
+			box.winfo_children()]
 
 		new_list = [str(library.name) for library in db.get_libraries() \
 			if str(library.name) not in old_list]
@@ -258,9 +271,44 @@ class Analysis_Tab(Tab):
 		for library in new_list:
 			line = Frame(self.library_window)
 			add_button = Button(line, text='Add',
-				command = lambda lib = library, line=line: self.add_to_frame(lib, listbox, destroy=line))
+				command = lambda lib = library, line=line: self.add_to_frame(\
+					lib, listbox, destroy=line))
 			label = Label(line, text=library)
 
 			label.grid(column=0, row=0)
 			add_button.grid(column=1, row=0)
 			line.pack(side=TOP, fill=BOTH)
+	def heatmap(self):
+		by_amino_acid = True
+		num_weights_to_output = 10
+
+		test_size = 0.2
+		label_threshold = 1.0
+		filter_invalid = True
+
+		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
+
+		try:
+			# sequence_label_dict = self.analysis_set.get_enrichment(
+			# 	self.libraries_of_interest[0], self.starting_library,
+			# 	by_amino_acid=by_amino_acid,
+			# 	count_threshold = self.count_threshold)
+
+			# sequence_matrix, label_matrix =\
+			# 	utils.convert_sequence_label_dict_to_matrices(
+			# 		sequence_label_dict)
+			# feature_descriptions, feature_matrix, amino_labels = \
+			# 	features.get_position_features(sequence_matrix)
+			for library in libraries_of_interest:
+				library = db.get_library(library)
+				heatmap = heat.heatmap(title = library.name)
+				heatmap.normalized_sequence_counts(
+					library=library,
+					by_amino_acid=by_amino_acid,
+					count_threshold=self.count_threshold,
+					filter_invalid=filter_invalid)
+				heat.heatmap.draw(heatmap,show=False)
+			plt.show(block=False)
+		except Exception as e:
+			tkMessageBox.showinfo("Something is wrong with yer code, bro",
+				str(e))
