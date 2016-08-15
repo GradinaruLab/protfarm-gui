@@ -50,9 +50,11 @@ class Alignment_Statistics_Tab(Tab):
 			text='Select All', variable = all_aligns)
 		self.select_all_aligns.pack(side=TOP)
 		self.select_all_libs.pack(side=TOP)
-
-		self.library_wrapper = self.scroll_area(self.first_left_frame)
-		self.alignment_wrapper = self.scroll_area(self.second_left_frame)
+		height = self.winfo_screenheight()*0.3
+		self.library_wrapper = self.scroll_area(self.first_left_frame,
+			height=height)
+		self.alignment_wrapper = self.scroll_area(self.second_left_frame,
+			height=height)
 
 		self.library_lines = []
 		self.alignment_lines = []
@@ -71,8 +73,9 @@ class Alignment_Statistics_Tab(Tab):
 		self.resize_bar(self.right_frame, orient='y')
 
 		self.table_wrapper = Frame(self.right_frame)
-
-		self.table_frame = self.scroll_area(self.table_wrapper, scroll_x=True)
+		height = self.winfo_screenheight()*0.8
+		self.table_frame = self.scroll_area(self.table_wrapper, scroll_x=True,
+			height=height)
 		self.table_frame.bind('<Button-4>', lambda e:self.scroll(e))
 		self.table_frame.bind('<Button-5>', lambda e:self.scroll(e))
 		self.table_frame.bind('<Control-4>', lambda e:self.scroll_x(e))

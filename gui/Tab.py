@@ -52,6 +52,7 @@ class Tab(Frame):
 		sibling = master.winfo_children()[index - 1] if index > 0 else None
 		if sibling is None:
 			return
+
 		# The width to split
 		width = (0.0 + sibling.winfo_width() + widget.winfo_width()) /\
 			master.winfo_width()
@@ -124,9 +125,10 @@ class Tab(Frame):
 				continue
 			else:
 				break
-	def scroll_area(self, parent_frame, scroll_y = True, scroll_x = False):
+	def scroll_area(self, parent_frame, scroll_y = True, scroll_x = False,
+		height = 200):
 		scroll_frame = Frame(parent_frame, relief = GROOVE, bd = 2)
-
+		
 		canvas = Canvas(scroll_frame, bd=3, bg='white')
 		wrapper = Frame(canvas, height = 0)
 		
@@ -147,12 +149,12 @@ class Tab(Frame):
 			canvas.bind("<Control-5>", lambda e: self.scroll_x(e))
 			x_scrollbar.pack(side=BOTTOM, fill='x')	
 
-		canvas.pack(side=TOP, fill=BOTH)
+		canvas.pack(side=TOP, fill='x')
 		canvas.create_window((20, 0), window=wrapper, anchor='nw')
 		wrapper.bind("<Configure>", lambda e: canvas.configure(
 			scrollregion=canvas.bbox("all"),
-			height = parent_frame.winfo_height()))
-		scroll_frame.pack(fill=BOTH, padx=10, pady=10)
+			height = height))
+		scroll_frame.pack(fill='x', padx=10, pady=10)
 
 		return wrapper
 
