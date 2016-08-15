@@ -161,6 +161,17 @@ class Tab(Frame):
 	def getlen(self, lst):
 		return len(lst)
 
+	def show_message(self, message, mtype = 'error'):
+		if type(message).__name__ == 'str':
+			message = [message]
+		mtype = mtype.upper()
+		if mtype == 'ERROR':
+			tkMessageBox.showerror(mtype, '\n\n'.join(message))
+		elif mtype == 'WARNING':
+			tkMessageBox.showerror(mtype, '\n\n'.join(message))
+		elif mtype == 'INFO':
+			tkMessageBox.showinfo(mtype, '\n\n'.join(message))
+
 	def resize_bar(self, frame, orient='x', size=3, bg='#1f1f1f'):
 		"""
 		Creates a resize bar in frame.

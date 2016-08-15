@@ -20,6 +20,7 @@ from workspace import Template as tp
 from workspace import Alignment as al
 from workspace import Database as db
 from analysis import enrichment as enrichment_analysis
+from analysis import amino_acids as amino_acid_analysis
 from Tab import *
 import matplotlib
 import matplotlib.pyplot as plt
@@ -147,7 +148,39 @@ class Analysis_Tab(Tab):
 		self.by_amino_acid_checkbox.grid(row=3, column=1, sticky='w',
 			padx=5, pady=5)
 
+		#8 - Log Scale
+		Label(frame, text='Log Scale?').grid(
+			row=4, column=0, sticky='nw', padx=5, pady=5)
+		self.log_scale = IntVar()
+		self.log_scale_checkbox = Checkbutton(frame,
+			variable=self.log_scale)
+		self.log_scale_checkbox.select()
+		self.log_scale_checkbox.grid(row=4, column=1, sticky='w',
+			padx=5, pady=5)
 
+		#9 - Enrichment threshold
+		Label(frame, text='Enrichment threshold').grid(
+			row=6, column=0, sticky='nw', padx=5, pady=5)
+		self.enrichment_threshold = StringVar()
+		self.enrichment_threshold.set('0.0')
+		self.enrichment_threshold_entry = Entry(frame, \
+			textvariable = self.enrichment_threshold).grid(
+			row=6, column=1, sticky='news', padx=5, pady=5)
+
+		#10 - Amino acid characteristic
+		Label(frame, text='Amino acid property').grid(
+			row=7, column=0, sticky='nw', padx=5, pady=5)
+		self.amino_acid_property = StringVar()
+		self.amino_acid_property_list = ['molecular weight', 'gravy']
+		self.amino_acid_property_dropdown = OptionMenu(
+			frame, self.amino_acid_property, *self.amino_acid_property_list)
+
+		self.amino_acid_property.set(self.amino_acid_property_list[0])
+
+		self.amino_acid_property_dropdown.grid(row=7, column=1, sticky='nw',
+			padx=5, pady=5)
+		
+		####Buttons for things	
 		nice_button_wrapper = Frame(self.main_frame)
 		self.generate_heatmap_btn = Button(nice_button_wrapper, text='Heatmap',
 			command=self.heatmap)
@@ -164,6 +197,13 @@ class Analysis_Tab(Tab):
 
 		self.plot_enrichment_distribution_btn.grid(row=1, column = 0,
 			sticky='se', padx=5, pady = 5)
+
+		self.plot_amino_acid_property_distribution_btn = \
+			Button(self.main_frame, text='Plot amino acid property distribution', \
+				command = self.plot_amino_acid_property_distribution)
+
+		self.plot_amino_acid_property_distribution_btn.grid(row=2, column = 3,
+			sticky='se', padx=5, pady=5)
 
 		Grid.columnconfigure(self, 0, weight=1)		
 		nice_button_wrapper.grid(column=3, row=3, sticky='se', padx=5, pady=5)
@@ -186,7 +226,29 @@ class Analysis_Tab(Tab):
 		try:
 			threshold = int(self.count_threshold.get().strip())
 		except:
-			threshold = False
+			self.show_message('Invalid count threshold: must be a number')
+			return
+
+		try:
+			by_amino_acid = bool(self.by_amino_acid.get())
+		except:
+			by_amino_acid = True
+
+		try:
+			zero_count_default_value = float(self.zero_count_default_value.get().strip())
+		except:
+			self.show_message('Invalid zero count default: must be a number')
+			return
+
+		try:
+			include_zero_counts = bool(self.include_zero_counts.get())
+		except:
+			include_zero_counts = False
+
+		try:
+			log_scale = bool(self.log_scale.get())
+		except:
+			log_scale = True
 
 		enrichments = []
 
@@ -197,10 +259,88 @@ class Analysis_Tab(Tab):
 
 		for library_name in libraries_of_interest:
 			sequence_enrichments = self.analysis_set.get_enrichment( \
-				starting_library, library_name, count_threshold=threshold)
+				library_name, starting_library, count_threshold=threshold,
+				by_amino_acid = by_amino_acid, zero_count_magic_number = zero_count_default_value,
+				include_zero_count = include_zero_counts, Log_Scale = log_scale)
+
 			enrichments.extend(sequence_enrichments.values())
 
 		enrichment_analysis.plot_distribution(enrichments)
+
+	def plot_amino_acid_property_distribution(self):
+
+		self.analysis_set = Analysis_Set()
+		starting_library = self.starting_library_dd.var.get()
+		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
+
+		try:
+			threshold = int(self.count_threshold.get().strip())
+		except:
+			self.show_message('Invalid count threshold: must be a number')
+			return
+
+		try:
+			by_amino_acid = bool(self.by_amino_acid.get())
+
+			if not by_amino_acid:
+				self.show_message('Must do analysis by amino acid for amino acid property distributions')
+				return
+		except:
+			by_amino_acid = True
+
+		try:
+			zero_count_default_value = float(self.zero_count_default_value.get().strip())
+		except:
+			self.show_message('Invalid zero count default: must be a number')
+			return
+
+		try:
+			include_zero_counts = bool(self.include_zero_counts.get())
+		except:
+			include_zero_counts = False
+
+		try:
+			log_scale = bool(self.log_scale.get())
+		except:
+			log_scale = True
+
+		try:
+			amino_acid_property = str(self.amino_acid_property.get())
+		except:
+			amino_acid_property = self.amino_acid_property_list[0]
+
+		try:
+			enrichment_threshold = float(self.enrichment_threshold.get().strip())
+		except:
+			self.show_message('Invalid enrichment threshold: must be a number')
+			return
+
+		self.analysis_set.add_library(db.get_library(starting_library))
+
+		above_enrichment_sequences = []
+		below_enrichment_sequences = []
+		
+		for library in libraries_of_interest:
+			self.analysis_set.add_library(db.get_library(library))
+
+		for library_name in libraries_of_interest:
+				
+			sequence_enrichments = self.analysis_set.get_enrichment( \
+				library_name, starting_library, count_threshold=threshold,
+				by_amino_acid = by_amino_acid, zero_count_magic_number = zero_count_default_value,
+				include_zero_count = include_zero_counts, Log_Scale = log_scale)
+
+			library_above_enrichment_sequences, library_below_enrichment_sequences = \
+				enrichment_analysis.split_by_enrichment(sequence_enrichments,
+					enrichment_threshold=enrichment_threshold)
+
+			above_enrichment_sequences.extend(library_above_enrichment_sequences)
+			below_enrichment_sequences.extend(library_below_enrichment_sequences)
+
+		amino_acid_charact_matrix_high_enrich = amino_acid_analysis.generate_matrix_of_interest(above_enrichment_sequences,matrix_property=amino_acid_property)
+		amino_acid_charact_matrix_below_enrich = amino_acid_analysis.generate_matrix_of_interest(below_enrichment_sequences,matrix_property=amino_acid_property)
+		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_high_enrich,amino_acid_property,'Enriched above 0')
+		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_below_enrich,amino_acid_property,'Enriched below 0')
 
 	def export_all(self):
 

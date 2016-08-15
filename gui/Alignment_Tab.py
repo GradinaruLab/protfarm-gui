@@ -226,17 +226,6 @@ class Alignment_Tab(Tab):
 				.grid(row = i, column = 1, padx = 2, pady = 2, sticky='news')
 			i += 1
 
-	def show_message(self, message, mtype = 'error'):
-		if type(message).__name__ == 'str':
-			message = [message]
-		mtype = mtype.upper()
-		if mtype == 'ERROR':
-			tkMessageBox.showerror(mtype, '\n\n'.join(message))
-		elif mtype == 'WARNING':
-			tkMessageBox.showerror(mtype, '\n\n'.join(message))
-		elif mtype == 'INFO':
-			tkMessageBox.showinfo(mtype, '\n\n'.join(message))
-
 	def update_progress(self, text):
 
 		self._progress_text = text
