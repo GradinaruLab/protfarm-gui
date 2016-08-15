@@ -19,6 +19,7 @@ from workspace import Library as lb
 from workspace import Template as tp
 from workspace import Alignment as al
 from workspace import Database as db
+from analysis import enrichment as enrichment_analysis
 from Tab import *
 
 class Analysis_Tab(Tab):
@@ -104,11 +105,17 @@ class Analysis_Tab(Tab):
 			row=0, column=1, sticky='news', padx=5, pady=5)
 		frame.grid(row=3, column=0)
 
-
 		self.export_btn = Button(self.main_frame, text='Export All to CSV',
 			command= self.export_all)
 
 		self.export_btn.grid(row=4, column=3, sticky='se', padx=5, pady=5)
+
+		self.plot_enrichment_distribution_btn = \
+			Button(self.main_frame, text='Plot enrichment distribution', \
+				command= self.plot_enrichment_distribution)
+
+		self.plot_enrichment_distribution_btn.grid(row=3, column = 3,
+			sticky='se', padx=5, pady = 5)
 
 		Grid.columnconfigure(self, 0, weight=1)		
 		self.main_frame.grid(column=0, row=0, sticky='news')
@@ -119,6 +126,32 @@ class Analysis_Tab(Tab):
 		Reloads everything from the database and initializes
 		"""
 		pass
+
+	def plot_enrichment_distribution(self):
+
+		self.analysis_set = Analysis_Set()
+		starting_library = self.starting_library_dd.var.get()
+		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
+
+		try:
+			threshold = int(self.count_threshold.get().strip())
+		except:
+			threshold = False
+
+		enrichments = []
+
+		self.analysis_set.add_library(db.get_library(starting_library))
+		
+		for library in libraries_of_interest:
+			self.analysis_set.add_library(db.get_library(library))
+
+		for library_name in libraries_of_interest:
+			sequence_enrichments = self.analysis_set.get_enrichment( \
+				starting_library, library_name, count_threshold=threshold)
+			enrichments.extend(sequence_enrichments.values())
+
+		enrichment_analysis.plot_distribution(enrichments)
+
 	def export_all(self):
 
 		self.analysis_set = Analysis_Set()
@@ -138,7 +171,8 @@ class Analysis_Tab(Tab):
 
 		filename = 'analysis.csv'
 		self.analysis_set.export_enrichment_specificity(filename,
-			starting_library, libraries_to_compare, count_threshold = self.count_threshold.get())
+			starting_library, libraries_to_compare, count_threshold = self.count_threshold.get(),
+			by_amino_acid = True)
 		print 'starting',  starting_library
 		print 'Threshold', self.count_threshold.get()
 		print 'libraries_of_interest', libraries_of_interest
