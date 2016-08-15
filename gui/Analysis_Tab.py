@@ -58,9 +58,14 @@ class Analysis_Tab(Tab):
 		except:
 			pass
 
-		self.libraries_of_interest = Listbox(self.enrichment_frame)
-		self.libraries_to_compare = Listbox(self.specificity_frame)
-		
+		frame = Frame(self.enrichment_frame)
+		height = self.winfo_screenheight()
+		self.libraries_of_interest = self.scroll_area(frame, height=height*0.3)
+		frame.grid(row=1, column=1, sticky='news')	
+		frame = Frame(self.specificity_frame)
+		self.libraries_to_compare = self.scroll_area(frame, height=height*0.3)
+		frame.grid(row=0, column=1, sticky='news')
+
 		for library in db.get_libraries():
 			self.add_to_frame(library.name, self.libraries_of_interest)
 
@@ -68,8 +73,8 @@ class Analysis_Tab(Tab):
 		lab = Label(self.enrichment_frame, text='Libraries of Interest ')
 		lab.grid(row=1, column=0, sticky='nw', padx=5, pady=5)
 
-		self.libraries_of_interest.grid(
-			row=1, column=1, sticky='news', padx=5, pady=5, rowspan=2)
+		# self.libraries_of_interest.grid(
+		# 	row=1, column=1, sticky='news', padx=5, pady=5, rowspan=2)
 
 		# Grid.columnconfigure(self.enrichment_frame, 0, weight=1)
 		Grid.columnconfigure(self.enrichment_frame, 1, weight=1)
@@ -84,8 +89,8 @@ class Analysis_Tab(Tab):
 		lab = Label(self.specificity_frame, text='Libraries to Compare')
 		lab.grid(row=0, column=0, sticky='nws', padx=5, pady=5)
 
-		self.libraries_to_compare.grid(
-			row=0, column=1, sticky='news', padx=5, pady=5, rowspan=2)
+		# self.libraries_to_compare.grid(
+		# 	row=0, column=1, sticky='news', padx=5, pady=5, rowspan=2)
 
 		# Grid.columnconfigure(self.specificity_frame, 0, weight=1)
 		Grid.columnconfigure(self.specificity_frame, 1, weight=1)
@@ -156,8 +161,10 @@ class Analysis_Tab(Tab):
 
 		self.analysis_set = Analysis_Set()
 		starting_library = self.starting_library_dd.var.get()
-		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
-		libraries_to_compare = [str(line.name) for line in self.libraries_to_compare.winfo_children()]
+		libraries_of_interest = [str(line.name) for line in\
+			self.libraries_of_interest.winfo_children()]
+		libraries_to_compare = [str(line.name) for line in \
+			self.libraries_to_compare.winfo_children()]
 		try:
 			threshold = int(self.count_threshold.get().strip())
 		except:
