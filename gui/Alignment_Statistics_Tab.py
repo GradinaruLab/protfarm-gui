@@ -96,13 +96,18 @@ class Alignment_Statistics_Tab(Tab):
 			pass
 
 		swap_button.pack(side = LEFT, fill='y')
-		# try:
-		self.methods.append('HI tyher')
-		select_best = OptionMenu(self.button_frame, selected_method, \
-			*self.methods, command=self.method_selected)
-		select_best.pack(side = RIGHT, fill='y')
-		# except:
-		# 	pass
+		try:
+			frame = Frame(self.button_frame)
+			select_best = OptionMenu(frame, selected_method, \
+				*self.methods, command=self.method_selected)
+			# select_best.pack(side = TOP, fill='y')
+			lab = Label(frame, text='Selected method:')
+			lab.pack(side=LEFT, padx=5)
+			select_best.pack(side=LEFT, padx=5)
+			frame.pack(side = TOP, fill='y')
+
+		except:
+			pass
 
 		self.button_frame.pack(side=BOTTOM, fill = 'x', padx=5, pady=5)
 		offset = 0.02
@@ -174,6 +179,13 @@ class Alignment_Statistics_Tab(Tab):
 			btn.pack(side=RIGHT, pady = 2, padx=2)
 			line.pack(side=TOP, fill=BOTH)
 			self.library_lines.append(line)
+
+			line.bind("<Button-4>", self.scroll)
+			line.bind("<Button-5>", self.scroll)
+			line.ch_btn.bind("<Button-4>", self.scroll)
+			line.ch_btn.bind("<Button-5>", self.scroll)
+			btn.bind("<Button-4>", self.scroll)
+			btn.bind("<Button-5>", self.scroll)
 			i+=1
 
 		i = 0
