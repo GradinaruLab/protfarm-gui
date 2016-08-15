@@ -184,29 +184,29 @@ class Analysis_Tab(Tab):
 		nice_button_wrapper = Frame(self.main_frame)
 		self.generate_heatmap_btn = Button(nice_button_wrapper, text='Heatmap',
 			command=self.heatmap)
-		self.generate_heatmap_btn.grid(row=0, column=0)
+		self.generate_heatmap_btn.grid(row=0, column=0, sticky='news')
 
 		self.export_btn = Button(nice_button_wrapper, text='Export All to CSV',
 			command= self.export_all)
 
-		self.export_btn.grid(row=2, column=0, sticky='se', padx=5, pady=5)
+		self.export_btn.grid(row=1, column=0, sticky='news', padx=5, pady=5)
 
 		self.plot_enrichment_distribution_btn = \
 			Button(nice_button_wrapper, text='Plot enrichment distribution', \
 				command= self.plot_enrichment_distribution)
 
-		self.plot_enrichment_distribution_btn.grid(row=1, column = 0,
-			sticky='se', padx=5, pady = 5)
+		self.plot_enrichment_distribution_btn.grid(row=2, column = 0,
+			sticky='news', padx=5, pady = 5)
 
 		self.plot_amino_acid_property_distribution_btn = \
-			Button(self.main_frame, text='Plot amino acid property distribution', \
+			Button(nice_button_wrapper, text='Plot amino acid property distribution', \
 				command = self.plot_amino_acid_property_distribution)
 
-		self.plot_amino_acid_property_distribution_btn.grid(row=2, column = 3,
-			sticky='se', padx=5, pady=5)
+		self.plot_amino_acid_property_distribution_btn.grid(row=3, column = 0,
+			sticky='news', padx=5, pady=5)
 
 		Grid.columnconfigure(self, 0, weight=1)		
-		nice_button_wrapper.grid(column=3, row=3, sticky='se', padx=5, pady=5)
+		nice_button_wrapper.grid(column=3, row=2, sticky='se', padx=5, pady=5)
 
 		self.main_frame.grid(column=0, row=0, sticky='news')
 
@@ -448,7 +448,8 @@ class Analysis_Tab(Tab):
 					count_threshold=self.count_threshold,
 					filter_invalid=filter_invalid)
 				heat.heatmap.draw(heatmap,show=False)
-			plt.show(block=False)
+
+			plt.show()
 		except Exception as e:
 			tkMessageBox.showinfo("Something is wrong with yer code, bro",
 				str(e))
