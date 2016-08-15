@@ -66,6 +66,9 @@ class Analysis_Tab(Tab):
 		self.libraries_to_compare = self.scroll_area(frame, height=height*0.3)
 		frame.grid(row=0, column=1, sticky='news')
 
+		self.libraries_of_interest.bind('<Button-4>', self.scroll)
+		self.libraries_of_interest.bind('<Button-5>', self.scroll)
+		
 		for library in db.get_libraries():
 			self.add_to_frame(library.name, self.libraries_of_interest)
 
@@ -73,8 +76,8 @@ class Analysis_Tab(Tab):
 		lab = Label(self.enrichment_frame, text='Libraries of Interest ')
 		lab.grid(row=1, column=0, sticky='nw', padx=5, pady=5)
 
-		# self.libraries_of_interest.grid(
-		# 	row=1, column=1, sticky='news', padx=5, pady=5, rowspan=2)
+		#self.libraries_of_interest.grid(
+		#	row=1, column=1, sticky='news', padx=5, pady=5, rowspan=2)
 
 		# Grid.columnconfigure(self.enrichment_frame, 0, weight=1)
 		Grid.columnconfigure(self.enrichment_frame, 1, weight=1)
@@ -89,8 +92,8 @@ class Analysis_Tab(Tab):
 		lab = Label(self.specificity_frame, text='Libraries to Compare')
 		lab.grid(row=0, column=0, sticky='nws', padx=5, pady=5)
 
-		# self.libraries_to_compare.grid(
-		# 	row=0, column=1, sticky='news', padx=5, pady=5, rowspan=2)
+		#self.libraries_to_compare.grid(
+		#	row=0, column=1, sticky='news', padx=5, pady=5, rowspan=2)
 
 		# Grid.columnconfigure(self.specificity_frame, 0, weight=1)
 		Grid.columnconfigure(self.specificity_frame, 1, weight=1)
@@ -103,12 +106,42 @@ class Analysis_Tab(Tab):
 
 		# 4 - Count threshold
 		frame = Frame(self.main_frame)
-		lab = Label(frame, text='Count Threshold').grid(
+		Label(frame, text='Count Threshold').grid(
 			row=0, column=0, sticky='nw', padx=5, pady=5)
 		self.count_threshold = StringVar()
+		self.count_threshold.set('100')
 		self.threshold_entry = Entry(frame, textvariable = self.count_threshold).grid(
 			row=0, column=1, sticky='news', padx=5, pady=5)
-		frame.grid(row=3, column=0)
+		frame.grid(row=1, column=1, sticky='n')
+
+		#5 - Include zero counts
+		Label(frame, text='Include zero counts?').grid(
+			row=1, column=0, sticky='nw', padx=5, pady=5)
+		self.include_zero_counts = IntVar()
+		self.include_zero_counts_checkbox = Checkbutton(frame,
+			variable=self.include_zero_counts)
+		self.include_zero_counts_checkbox.deselect()
+		self.include_zero_counts_checkbox.grid(row=1, column=1, sticky='w',
+			padx=5, pady=5)
+
+		#6 - Zero count default value
+		Label(frame, text='Zero Count Default Value').grid(
+			row=2, column=0, sticky='nw', padx=5, pady=5)
+		self.zero_count_default_value = StringVar()
+		self.zero_count_default_value.set('0.9')
+		self.zero_count_default_value_entry = Entry(frame, \
+			textvariable = self.zero_count_default_value).grid(
+			row=2, column=1, sticky='news', padx=5, pady=5)
+
+		#7 - By Amino Acid
+		Label(frame, text='By Amino Acid?').grid(
+			row=3, column=0, sticky='nw', padx=5, pady=5)
+		self.by_amino_acid = IntVar()
+		self.by_amino_acid_checkbox = Checkbutton(frame,
+			variable=self.by_amino_acid)
+		self.by_amino_acid_checkbox.select()
+		self.by_amino_acid_checkbox.grid(row=3, column=1, sticky='w',
+			padx=5, pady=5)
 
 		self.export_btn = Button(self.main_frame, text='Export All to CSV',
 			command= self.export_all)
@@ -161,10 +194,8 @@ class Analysis_Tab(Tab):
 
 		self.analysis_set = Analysis_Set()
 		starting_library = self.starting_library_dd.var.get()
-		libraries_of_interest = [str(line.name) for line in\
-			self.libraries_of_interest.winfo_children()]
-		libraries_to_compare = [str(line.name) for line in \
-			self.libraries_to_compare.winfo_children()]
+		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
+		libraries_to_compare = [str(line.name) for line in self.libraries_to_compare.winfo_children()]
 		try:
 			threshold = int(self.count_threshold.get().strip())
 		except:
@@ -190,9 +221,18 @@ class Analysis_Tab(Tab):
 		Adds a new line for 'library' in the frame 'frame'
 		"""
 		line = Frame(frame, bg='white')
-		Label(line, text = library, bg='white').grid(row=0, column=0)
+		label = Label(line, text = library, bg='white')
+		label.grid(row=0, column=0)
 		rm_button = Button(line, text = 'Remove', command=line.destroy)
 		rm_button.grid(column=1, row=0)
+
+		line.bind('<Button-4>', self.scroll)
+		line.bind('<Button-5>', self.scroll)
+		label.bind('<Button-4>', self.scroll)
+		label.bind('<Button-5>', self.scroll)
+		rm_button.bind('<Button-4>', self.scroll)
+		rm_button.bind('<Button-5>', self.scroll)
+
 		line.name = library
 		line.pack(side=TOP, fill=BOTH, ipadx=5, ipady=5, padx=5, pady=5)
 		if destroy:
