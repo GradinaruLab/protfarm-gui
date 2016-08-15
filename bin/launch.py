@@ -77,11 +77,12 @@ root.wm_title('CLOVERpuff')
 
 
 if len(sys.argv) > 1:
-    ws.set_workspace_path(sys.argv[1])
+    directory = sys.argv[1]
 else:
     directory = tkFileDialog.askdirectory()
-    ws.set_workspace_path(directory)
 
-app = Application( master=root)
-app.mainloop()
+if directory:
+    ws.set_workspace_path(directory)
+    app = Application( master=root)
+    app.mainloop()
 root.destroy()
