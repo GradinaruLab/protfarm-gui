@@ -22,10 +22,9 @@ from workspace import Database as db
 from analysis import enrichment as enrichment_analysis
 from analysis import amino_acids as amino_acid_analysis
 from Tab import *
-import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib
 import seaborn as sns
-
 
 class Analysis_Tab(Tab):
 
@@ -341,6 +340,8 @@ class Analysis_Tab(Tab):
 		amino_acid_charact_matrix_below_enrich = amino_acid_analysis.generate_matrix_of_interest(below_enrichment_sequences,matrix_property=amino_acid_property)
 		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_high_enrich,amino_acid_property,'Enriched above 0')
 		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_below_enrich,amino_acid_property,'Enriched below 0')
+
+		plt.show()
 
 	def export_all(self):
 
