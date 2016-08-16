@@ -73,8 +73,8 @@ class Analysis_Tab(Tab):
 		self.libraries_of_interest.bind('<Button-4>', self.scroll)
 		self.libraries_of_interest.bind('<Button-5>', self.scroll)
 		
-		for library in db.get_libraries():
-			self.add_to_frame(library.name, self.libraries_of_interest)
+		# for library in db.get_libraries():
+		# 	self.add_to_frame(library.name, self.libraries_of_interest)
 
 		# 2 - Libraries of interest
 		lab = Label(self.enrichment_frame, text='Libraries of Interest ')
@@ -181,9 +181,10 @@ class Analysis_Tab(Tab):
 		
 		####Buttons for things	
 		nice_button_wrapper = Frame(self.main_frame)
-		self.generate_heatmap_btn = Button(nice_button_wrapper, text='Heatmap',
+		self.amino_acid_count_heatmap_btn = Button(nice_button_wrapper,
+			text='Amino Acid Count Heatmap',
 			command=self.heatmap)
-		self.generate_heatmap_btn.grid(row=0, column=0, sticky='news')
+		self.amino_acid_count_heatmap_btn.grid(row=0, column=0, sticky='news', padx=5)
 
 		self.export_btn = Button(nice_button_wrapper, text='Export All to CSV',
 			command= self.export_all)
@@ -191,14 +192,14 @@ class Analysis_Tab(Tab):
 		self.export_btn.grid(row=1, column=0, sticky='news', padx=5, pady=5)
 
 		self.plot_enrichment_distribution_btn = \
-			Button(nice_button_wrapper, text='Plot enrichment distribution', \
+			Button(nice_button_wrapper, text='Plot Enrichment Distribution', \
 				command= self.plot_enrichment_distribution)
 
 		self.plot_enrichment_distribution_btn.grid(row=2, column = 0,
 			sticky='news', padx=5, pady = 5)
 
 		self.plot_amino_acid_property_distribution_btn = \
-			Button(nice_button_wrapper, text='Plot amino acid property distribution', \
+			Button(nice_button_wrapper, text='Plot Amino Acid Property Distribution', \
 				command = self.plot_amino_acid_property_distribution)
 
 		self.plot_amino_acid_property_distribution_btn.grid(row=3, column = 0,
@@ -379,6 +380,10 @@ class Analysis_Tab(Tab):
 		rm_button = Button(line, text = 'Remove', command=line.destroy)
 		rm_button.grid(column=1, row=0)
 
+
+		Grid.columnconfigure(line, 0, weight=0)
+		Grid.columnconfigure(line, 0, weight=1)
+
 		line.bind('<Button-4>', self.scroll)
 		line.bind('<Button-5>', self.scroll)
 		label.bind('<Button-4>', self.scroll)
@@ -402,6 +407,9 @@ class Analysis_Tab(Tab):
 
 		self.library_window = Toplevel()
 		self.library_window.title('Libraries')
+		w = str(int(self.winfo_screenwidth()*0.4))
+		h = str(int(self.winfo_screenheight()*0.5))
+		self.library_window.geometry('300x500+0+0')
 
 		old_list = [str(line.name) for box in listboxes for line in \
 			box.winfo_children()]
@@ -416,8 +424,8 @@ class Analysis_Tab(Tab):
 					lib, listbox, destroy=line))
 			label = Label(line, text=library)
 
-			label.grid(column=0, row=0)
-			add_button.grid(column=1, row=0)
+			add_button.grid(column=0, row=0, padx=5, pady=5)
+			label.grid(column=1, row=0, padx=5, pady=5)
 			line.pack(side=TOP, fill=BOTH)
 	def heatmap(self):
 		by_amino_acid = True
@@ -425,9 +433,10 @@ class Analysis_Tab(Tab):
 
 		test_size = 0.2
 		label_threshold = 1.0
-		filter_invalid = True
+		filter_invalid = False
 
-		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
+		libraries_of_interest = [str(line.name) for line in \
+			self.libraries_of_interest.winfo_children()]
 
 		try:
 			# sequence_label_dict = self.analysis_set.get_enrichment(

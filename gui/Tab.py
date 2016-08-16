@@ -1,23 +1,11 @@
 from Tkinter import *
-# import tkFileDialog
-# from tkFileDialog import *
-# import tkMessageBox
-# import ttk
 import tkFont
 import sys
 import glob
 import os
 import threading
 from analysis import heat
-# import methods
-# import globals
-# import re
-# import numpy as np
 from workspace import Workspace as ws
-# from workspace import Library as lb
-# from workspace import Template as tp
-# from workspace import Alignment as al
-# from workspace import Database as db
 
 class Threaded_Aligner(threading.Thread):
  
@@ -130,7 +118,7 @@ class Tab(Frame):
 		scroll_frame = Frame(parent_frame, relief = GROOVE, bd = 2)
 		
 		canvas = Canvas(scroll_frame, bd=3, bg='white')
-		wrapper = Frame(canvas, height = 0)
+		wrapper = Frame(canvas, height = 0, bg='white')
 		
 		if scroll_y:
 			myscrollbar = Scrollbar(

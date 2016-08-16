@@ -39,8 +39,19 @@ class Alignment_Tab(Tab):
 		self.layer = Frame(self.left_frame, bd=0, relief=GROOVE)
 		self.second_left_frame = Frame(self.layer, bd=2, relief=GROOVE)
 		self.third_left_frame = Frame(self.layer, bd=2, relief=GROOVE)
-		self.library_frame = Frame(
-			self.third_left_frame, bg='white', padx=5, pady=5)
+
+		self.second_left_frame.place(
+			relwidth=1.0, relheight=0.40, relx=0.0, rely=0.0)
+		self.third_left_frame.place(
+			relwidth=1.0, relheight=0.60, relx=0.0, rely=0.40)
+
+
+		# self.library_frame = Frame(
+		# 	self.third_left_frame, bg='white', padx=5, pady=5)
+
+		# height = self.third_left_frame.winfo_height()
+		# print height
+		# self.library_frame = self.scroll_area(self.third_left_frame, height = height*0.9)
 
 		# Templates
 		self.template_lines = []
@@ -49,7 +60,7 @@ class Alignment_Tab(Tab):
 			side='top', pady=10)
 
 		var = StringVar()
-		var.set('ACGT' * 25)
+		# var.set('ACGT' * 25)
 
 		line = Frame(self.first_left_frame, pady=4, bd=1, relief=SUNKEN)
 		pocket = Frame(line)
@@ -86,17 +97,13 @@ class Alignment_Tab(Tab):
 		frame = Frame(self.second_left_frame)
 		new_lib = StringVar()
 		self.add_library_entry = Entry(frame, textvariable=new_lib)
-		add_lib_btn = Button(frame, text='Add Library',
-							 command=lambda: self.add_library(new_lib))
-		self.add_library_entry.bind("<Return>", lambda: self.add_library(
-			new_lib))
+		add_lib_btn = Button(frame, text='Add Library')
 		self.add_library_entry.pack(side=LEFT, fill=BOTH)
 		add_lib_btn.pack(side=LEFT, fill=BOTH)
 		frame.pack(pady=5, side=TOP)
 
 		# Make a scrollable area
 		self.file_wrapper = self.scroll_area(self.second_left_frame)
-		self.add_existing_libraries()
 
 		# View libraries
 
@@ -108,17 +115,26 @@ class Alignment_Tab(Tab):
 		display_frame.pack(side=TOP, pady=15)
 		Label(display_frame, text='Existing Libraries').pack(side=TOP)
 
-		self.library_frame.pack()
+		height = int(self.winfo_screenheight()*0.4)
+		self.library_frame = self.scroll_area(self.third_left_frame, height = height)
+		self.add_existing_libraries()
+
+		self.add_library_entry.bind("<Return>", lambda: self.add_library(
+			new_lib))
+
+		add_lib_btn["command"]=lambda: self.add_library(new_lib)
+
+		# self.library_frame.pack()
 		self.first_left_frame.grid(column=0, row=0, sticky='news')
 		self.layer.grid(column=0, row=1, sticky='news')
 
 		Grid.columnconfigure(self.left_frame, 0, weight=1)
 		Grid.rowconfigure(self.left_frame, 1, weight=1)
 
-		self.second_left_frame.place(
-			relwidth=1.0, relheight=0.40, relx=0.0, rely=0.0)
-		self.third_left_frame.place(
-			relwidth=1.0, relheight=0.60, relx=0.0, rely=0.40)
+		# self.second_left_frame.place(
+		# 	relwidth=1.0, relheight=0.40, relx=0.0, rely=0.0)
+		# self.third_left_frame.place(
+		# 	relwidth=1.0, relheight=0.60, relx=0.0, rely=0.40)
 
 		# Right frame
 
@@ -184,7 +200,7 @@ class Alignment_Tab(Tab):
 
 	def add_template(self, frame):
 		var = StringVar()
-		var.set('ACGT' * 25)
+		# var.set('ACGT' * 25)
 
 		line = Frame(self.first_left_frame, pady=4, bd=1, relief=SUNKEN)
 		pocket = Frame(line)
@@ -221,7 +237,7 @@ class Alignment_Tab(Tab):
 			Label(self.template_window, text = str(template.id), bg = 'white',
 				font = tkFont.Font(family='Courier'))\
 				.grid(row = i, column = 0, padx = 2, pady = 2, sticky ='news')
-			Label(self.template_window, text = str(template['sequence']),
+			Label(self.template_window, text = str(template.sequence),
 				bg = 'white', font = tkFont.Font(family='Courier'))\
 				.grid(row = i, column = 1, padx = 2, pady = 2, sticky='news')
 			i += 1
@@ -414,6 +430,16 @@ class Alignment_Tab(Tab):
 											lib_name))
 		if type(lib_var).__name__ not in ['str', 'unicode']:
 			lib_var.set('')
+
+		def binder(widget):
+			for child in widget.winfo_children():
+				binder(child)
+
+			widget.bind('<Button-4>', self.scroll)
+			widget.bind('<Button-5>', self.scroll)
+
+		binder(frame)
+
 		try:
 			self.add_library_entry.focus()
 		except AttributeError:
@@ -583,6 +609,7 @@ class Alignment_Tab(Tab):
 					old_index = self.library_dictionary[
 						old_lib]['files'].index(item)
 					self.library_dictionary[old_lib]['files'].remove(item)
+					
 					library_box = self.library_frame.winfo_children(
 					)[self.libraries.index(old_lib) - 1]
 					library_box.winfo_children()[1 + old_index].destroy()
