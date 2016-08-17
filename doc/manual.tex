@@ -1,0 +1,182 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[pdftex]{hyperref}
+\usepackage{makeidx,fancyhdr,graphicx,times,multicol,comment}
+\usepackage[T1]{fontenc}
+\usepackage{listingsutf8}
+\usepackage[a4paper,total={7in,8in}]{geometry}
+
+
+
+\title{Manual for CLOVERbot}
+\author{David Brown\\Tatyana Dobreva\\Pétur Helgi Einarsson}
+
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{\thepage}
+\cfoot{}
+
+\begin{document}
+\sloppy
+\maketitle
+
+\begin{abstract}
+The CLOVERbot software is the product of a SURF project at the CLOVER center 
+under the mentorship of Dr. Viviana Gradinaru and Dr. Benjamin E. Deverman 
+during the summer 2016. This software was built to speed up the process of
+ discovering new viral vectors with the CREATE selection method.
+\end{abstract}
+
+\tableofcontents
+
+\newpage
+
+\section{The Pipeline}
+
+\newpage
+\section{Aligning the Data}
+
+\subsection{Requirements}
+In order to run alignment, the following is required:
+
+\begin{itemize}
+    \item At least one sample is defined and non-empty of files in FASTQ format.
+    \item Template sequence for each sample to be aligned
+    \item One or more alignment is enabled
+\end{itemize}
+
+Template IDs are running integers starting at 1. To view templates that are 
+already in the database, click 'View Existing Templates'. When clicked, a 
+window pops up on the screen displaying all templates in the database and their 
+IDs. 
+
+\subsection{Alignment methods}
+
+\subsubsection{Perfect Match Alignment}
+The perfect match alignment matches a sequence read to the given template 
+sequence nucleotide by nucleotide. The perfect match alignment method allows 
+ambiguous characters in the template sequence.
+
+\vspace{0.5cm}
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|p{8cm}|}
+        \hline
+        \textbf{Parameter} & \textbf{Type} & \textbf{Meaning} \\
+        \hline
+        Mismatch Quality Threshold & Integer & The minimum read quality for a 
+        nucleotide read in a non-variant position\\
+        \hline
+        Variant Quality Threshold & Integer & The minimum read quality for a 
+        nucleotide read in a variant position.\\
+        \hline
+    \end{tabular}
+    \caption{Parameters for Perfect Match alignment}
+    \label{perfect_match_parameters}
+\end{table}
+
+\subsubsection{BowTie2}
+This method is still in progress. There are several approaches that can be used
+ with this method.
+
+\vspace{0.5cm}
+\noindent
+\underline{\textbf{Eliminating variants from template}}:
+
+This method removes the variants from the template sequence, making it shorter.
+ The sample is the aligned to the new template. The BowTie algorithm should 
+ then suggest inserts in the positions where the variants were originally with
+  a possibility of other insertions/deletions. This is not guaranteed to work 
+  but often gives better results than perfect match. The new inserts are then 
+  examined and are checked if they match with the form of the variants 
+  (NNK, NNN etc).
+
+\vspace{0.5cm}
+\noindent
+\underline{\textbf{Using wildcards}}:
+
+This approach uses Bowtie's ability to align with ambiguous characters. Since 
+BowTie interprets every character other than A, C, G and T to be Ns, this 
+method aligns to the template sequence with a small alternation. If there is a 
+K in a variant, it is substituted by a T. Bowtie will allow this but will 
+possibly indicate a mismatch at that location. If the mismatch shows a G in the
+ sequence read, the sequence matches. Similar approach is used for other IUPAC 
+ characters.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|l|l|l|p{8cm}|}
+    \hline
+        \textbf{Parameter} &\textbf{Type}&\textbf{Meaning}  \\
+        \hline
+         Local Alignment & Check box & Determines whether the alignment should 
+         be \textit{local} or \textit{global}\\
+         \hline
+         Approach & Radio button & Selects for which approach should be used.\\
+         \hline
+    \end{tabular}
+    \caption{Parameters for BowTie2 alignment}
+    \label{bowtie_parameters}
+\end{table}
+
+\subsection{Realigning}
+
+\subsection{Output}
+When an alignment method has finished aligning to a sample, the alignment 
+statistics are written to the database on disc. Under the 'Alignment Statistics'
+ tab, the user can watch the statistics as they are generated. A progress 
+ message is displayed above the 'Start Alignment' button.
+
+\subsection{IUPAC Ambiguity Codes}
+
+IUPAC ambiguity codes are used to express a character that matches more than 
+one nucleotide. The table can be seen below.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{|c|c|c|}
+    \hline
+    IUPAC Code & Meaning & Complement\\
+\hline
+A & A & T\\
+\hline
+C & C & G\\
+\hline
+G & G & C\\
+\hline
+T & T & A\\
+\hline
+M & A or C & K\\
+\hline
+R & A or G & Y\\
+\hline
+W & A or T & W\\
+\hline
+S & C or G & S\\
+\hline
+Y & C or T & R\\
+\hline
+K & G or T & M\\
+\hline
+V & A or C or G & B\\
+\hline
+H & A or C or T & D\\
+\hline
+D & A or G or T & H\\
+\hline
+B & C or G or T & V\\
+\hline
+N & A or C or G or T& N\\
+\hline
+    \end{tabular}
+    \caption{Source: 
+    \url{http://droog.gs.washington.edu/parc/images/iupac.html}}
+    \label{tab:my_label}
+\end{table}
+
+\section{Analysis}
+
+\subsection{Some analysis}
+
+\end{document}

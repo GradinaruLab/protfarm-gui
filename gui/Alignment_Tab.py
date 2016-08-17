@@ -80,7 +80,7 @@ class Alignment_Tab(Tab):
 		add_template_btn = Button(frame, text='Add template',
 								  command=lambda: self.add_template(
 									self.first_left_frame))
-		view_templates_btn = Button(frame, text='View existing templates',
+		view_templates_btn = Button(frame, text='View Existing Templates',
 			command = self.show_old_templates)
 		view_templates_btn.pack(side=RIGHT)
 		add_template_btn.pack(side=RIGHT, pady=10)
