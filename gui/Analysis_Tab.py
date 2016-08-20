@@ -21,6 +21,7 @@ from workspace import Alignment as al
 from workspace import Database as db
 from analysis import enrichment as enrichment_analysis
 from analysis import amino_acids as amino_acid_analysis
+from ml import feature_analysis
 from Tab import *
 import matplotlib.pyplot as plt
 import matplotlib
@@ -181,31 +182,43 @@ class Analysis_Tab(Tab):
 		self.amino_acid_property_dropdown.grid(row=7, column=1, sticky='nw',
 			padx=5, pady=5)
 		
-		####Buttons for things	
+		####Buttons for things
 		nice_button_wrapper = Frame(self.main_frame)
+
 		self.amino_acid_count_heatmap_btn = Button(nice_button_wrapper,
 			text='Amino Acid Count Heatmap',
 			command=self.heatmap)
-		self.amino_acid_count_heatmap_btn.grid(row=0, column=0, sticky='news', padx=5)
+		self.amino_acid_count_heatmap_btn.pack(side='top', fill='both', padx=5,
+			pady=5)
+
+		self.position_heatmap_btn = Button(nice_button_wrapper,
+			text='Position Heatmap',
+			command=self.position_heatmap)
+		self.position_heatmap_btn.pack(side='top', fill='both',
+			padx=5, pady=5)
+
+		self.amino_acid_characteristics_heatmap_btn = Button(\
+			nice_button_wrapper,
+			text='Amino Acid Characteristics Heatmap',
+			command=self.amino_acid_characteristics_heatmap)
+		self.amino_acid_characteristics_heatmap_btn.pack(side='top',
+			fill='both', padx=5, pady=5)
 
 		self.export_btn = Button(nice_button_wrapper, text='Export All to CSV',
 			command= self.export_all)
-
-		self.export_btn.grid(row=1, column=0, sticky='news', padx=5, pady=5)
+		self.export_btn.pack(side='top', fill='both', padx=5, pady=5)
 
 		self.plot_enrichment_distribution_btn = \
 			Button(nice_button_wrapper, text='Plot Enrichment Distribution', \
 				command= self.plot_enrichment_distribution)
-
-		self.plot_enrichment_distribution_btn.grid(row=2, column = 0,
-			sticky='news', padx=5, pady = 5)
+		self.plot_enrichment_distribution_btn.pack(side='top', fill='both',
+			padx=5, pady = 5)
 
 		self.plot_amino_acid_property_distribution_btn = \
 			Button(nice_button_wrapper, text='Plot Amino Acid Property Distribution', \
 				command = self.plot_amino_acid_property_distribution)
 
-		self.plot_amino_acid_property_distribution_btn.grid(row=3, column = 0,
-			sticky='news', padx=5, pady=5)
+		self.plot_amino_acid_property_distribution_btn.pack(side='top', fill='both', padx=5, pady=5)
 
 		Grid.columnconfigure(self, 0, weight=1)		
 		nice_button_wrapper.grid(column=3, row=2, sticky='se', padx=5, pady=5)
@@ -429,6 +442,68 @@ class Analysis_Tab(Tab):
 			add_button.grid(column=0, row=0, padx=5, pady=5)
 			label.grid(column=1, row=0, padx=5, pady=5)
 			line.pack(side=TOP, fill=BOTH)
+
+	def position_heatmap(self):
+		by_amino_acid = True
+		label_threshold = 1.0
+		count_threshold = 25
+
+		analysis_set = Analysis_Set()
+		starting_library_name = self.starting_library_dd.var.get()
+
+		libraries_of_interest_names = [str(line.name) for line in \
+			self.libraries_of_interest.winfo_children()]
+
+		analysis_set.add_library(db.get_library(starting_library_name))
+
+		for library_of_interest_name in libraries_of_interest_names:
+			analysis_set.add_library(db.get_library(library_of_interest_name))
+
+		weights, feature_labels = \
+			feature_analysis.get_position_feature_weights(analysis_set,
+			starting_library = starting_library_name,
+			library_of_interest = libraries_of_interest_names[0],
+			by_amino_acid = by_amino_acid, count_threshold = count_threshold)
+
+		position_labels = range(1,analysis_set.get_sequence_length() + 1)
+		position_labels = [str(i) for i in position_labels]
+
+		heatmap = heat.heatmap(title = 'Amino Acid Position Weights',
+			data=weights, y_labels=position_labels, x_labels=feature_labels)
+
+		heat.heatmap.draw(heatmap, show=False)
+		plt.show()
+
+	def amino_acid_characteristics_heatmap(self):
+		label_threshold = 1.0
+		count_threshold = 25
+
+		analysis_set = Analysis_Set()
+		starting_library_name = self.starting_library_dd.var.get()
+
+		libraries_of_interest_names = [str(line.name) for line in \
+			self.libraries_of_interest.winfo_children()]
+
+		analysis_set.add_library(db.get_library(starting_library_name))
+
+		for library_of_interest_name in libraries_of_interest_names:
+			analysis_set.add_library(db.get_library(library_of_interest_name))
+
+		weights, feature_labels = \
+			feature_analysis.get_amino_acid_characteristics_feature_weights(\
+			analysis_set, starting_library = starting_library_name,
+			library_of_interest = libraries_of_interest_names[0],
+			count_threshold = count_threshold)
+
+		position_labels = range(1,analysis_set.get_sequence_length() + 1)
+		position_labels = [str(i) for i in position_labels]
+
+		heatmap = heat.heatmap(title = 'Amino Acid Characteristic Weights',
+			data=weights, y_labels=position_labels, x_labels=feature_labels)
+
+		heat.heatmap.draw(heatmap, show=False)
+		plt.show()
+
 	def heatmap(self):
 		
 		# for process in self.processes:
@@ -440,12 +515,9 @@ class Analysis_Tab(Tab):
 		# 	if process.is_alive():
 		# 		process.terminate()
 		# 	else: print process.name, 'is dead'
-
 		by_amino_acid = True
-		num_weights_to_output = 10
 
 		test_size = 0.2
-		label_threshold = 1.0
 		filter_invalid = False
 
 		libraries_of_interest = [str(line.name) for line in \
@@ -471,9 +543,7 @@ class Analysis_Tab(Tab):
 					filter_invalid=filter_invalid)
 				heat.heatmap.draw(heatmap,show=False)
 
-			# plt.ion()
-			plt.show(block=False)
-			# plt.pause(0.001)
+			plt.show()
 
 		except Exception as e:
 			tkMessageBox.showinfo("",
