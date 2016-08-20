@@ -116,7 +116,8 @@ class Alignment_Tab(Tab):
 		Label(display_frame, text='Existing Libraries').pack(side=TOP)
 
 		height = int(self.winfo_screenheight()*0.4)
-		self.library_frame = self.scroll_area(self.third_left_frame, height = height)
+		self.library_frame = self.scroll_area(self.third_left_frame,
+			height = height)
 		self.add_existing_libraries()
 
 		self.add_library_entry.bind("<Return>", lambda: self.add_library(
@@ -495,7 +496,10 @@ class Alignment_Tab(Tab):
 			self.library_dictionary[new_lib]['files'].append(file)
 			library_box = self.library_frame.winfo_children()\
 			[self.libraries.index(new_lib) - 1]
-			Label(library_box, text=file).pack(side=TOP, fill=BOTH, anchor='w')
+			label = Label(library_box, text=file)
+			label.bind("<Button-4>",self.scroll)
+			label.bind("<Button-5>",self.scroll)
+			label.pack(side=TOP, fill=BOTH, anchor='w')
 		try:
 			old_index = self.library_dictionary[old_lib]['files'].index(file)
 			self.library_dictionary[old_lib]['files'].remove(file)

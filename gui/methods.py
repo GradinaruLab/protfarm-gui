@@ -22,13 +22,13 @@ methods = {
 					'name':'bt1'
 				},
 				'Match using elimination': {
-					'type':'Entry',
+					'type':'Checkbutton',
                     'datatype':'str',
 					'name':'bt2'
 				},
-				'Number of mistakes': {
+				'Total Quality Score Threshold': {
 					'type':'Entry',
-					'datatype':'int',
+					'datatype':'float',
 					'name':'bt3'
 				},
 				'Allow insertions/deletions': {

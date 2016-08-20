@@ -26,6 +26,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
 
+from multiprocessing import Process
+
 class Analysis_Tab(Tab):
 
 	def __init__(self, master, **kwargs):
@@ -33,7 +35,7 @@ class Analysis_Tab(Tab):
 		Tab.__init__(self, master, **kwargs)
 
 		self.analysis_set = Analysis_Set()
-
+		self.processes = []
 		self.main_frame = Frame(self, padx=10, pady=10, relief=GROOVE, bd=2)
 
 		Grid.columnconfigure(self.main_frame, 0, weight=1)
@@ -342,7 +344,7 @@ class Analysis_Tab(Tab):
 		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_high_enrich,amino_acid_property,'Enriched above 0')
 		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_below_enrich,amino_acid_property,'Enriched below 0')
 
-		plt.show()
+		plt.show(block=False)
 
 	def export_all(self):
 
@@ -428,6 +430,17 @@ class Analysis_Tab(Tab):
 			label.grid(column=1, row=0, padx=5, pady=5)
 			line.pack(side=TOP, fill=BOTH)
 	def heatmap(self):
+		
+		# for process in self.processes:
+		# 	if process.is_alive():
+		# 		process.terminate()
+		# 	else: print process.name, 'is dead'
+
+		# for process in self.processes:
+		# 	if process.is_alive():
+		# 		process.terminate()
+		# 	else: print process.name, 'is dead'
+
 		by_amino_acid = True
 		num_weights_to_output = 10
 
@@ -437,7 +450,6 @@ class Analysis_Tab(Tab):
 
 		libraries_of_interest = [str(line.name) for line in \
 			self.libraries_of_interest.winfo_children()]
-
 		try:
 			# sequence_label_dict = self.analysis_set.get_enrichment(
 			# 	self.libraries_of_interest[0], self.starting_library,
@@ -459,7 +471,10 @@ class Analysis_Tab(Tab):
 					filter_invalid=filter_invalid)
 				heat.heatmap.draw(heatmap,show=False)
 
-			plt.show()
+			# plt.ion()
+			plt.show(block=False)
+			# plt.pause(0.001)
+
 		except Exception as e:
-			tkMessageBox.showinfo("Something is wrong with yer code, bro",
+			tkMessageBox.showinfo("",
 				str(e))

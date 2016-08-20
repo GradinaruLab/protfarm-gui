@@ -8,7 +8,7 @@ from analysis import heat
 from workspace import Workspace as ws
 
 class Threaded_Aligner(threading.Thread):
- 
+  
 	def __init__(self, alignment_tab):
 		threading.Thread.__init__(self)
 		self.alignment_tab = alignment_tab

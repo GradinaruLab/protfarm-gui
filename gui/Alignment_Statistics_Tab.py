@@ -13,6 +13,7 @@ import methods
 import globals
 import re
 import numpy as np
+from decimal import *
 from workspace import Workspace as ws
 from workspace import Library as lb
 from workspace import Template as tp
@@ -303,7 +304,7 @@ class Alignment_Statistics_Tab(Tab):
 					sticky = 'news', columnspan=2, pady = 2, padx = 2)
 
 				alignment_id = alignment.id
-
+				getcontext().prec = 4
 				# Loop through libraries for data rows in table
 				for j, library in enumerate(libraries):
 					name = library.name
@@ -329,9 +330,14 @@ class Alignment_Statistics_Tab(Tab):
 									sticky ='news', pady = 2, padx = 2)
 								Grid.columnconfigure(self.table_frame, col_num,
 									weight = 1)
+							if (int(value) != float(value) and
+								float(value) != 0.0):							
+								value = \
+									str(Decimal(float(value))/Decimal(0.01)) \
+									+ '%'
 
 							k = self.columns.index(stat)
-							label = Label(self.table_frame, text = value,
+							label = Label(self.table_frame, text=str(value),
 								bg = 'white')
 							label.grid(row = offset, column = k+2, pady = 2,
 								padx = 2, sticky = 'news')
@@ -370,9 +376,14 @@ class Alignment_Statistics_Tab(Tab):
 									sticky ='news', pady = 2, padx = 2)
 								Grid.columnconfigure(self.table_frame, col_num,
 									weight = 1)
+							if (int(value) != float(value) and
+								float(value) != 0.0):							
+								value = \
+									str(Decimal(float(value))/Decimal(0.01)) \
+									+ '%'
 
 							k = self.columns.index(stat)
-							label = Label(self.table_frame, text = value,
+							label = Label(self.table_frame, text=value,
 								bg = 'white')
 							label.grid(row = offset, column = k+2, pady = 2,
 								padx = 2, sticky = 'news')
