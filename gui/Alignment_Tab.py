@@ -268,7 +268,8 @@ class Alignment_Tab(Tab):
 			for id in ids:
 				try:
 					id = int(id)
-					if not (0 <= id <= globals.next_template_seed or id in [template.id for template in db.get_templates()]):
+					if not (0 <= id <= globals.next_template_seed or id in \
+						[template.id for template in db.get_templates()]):
 						errors.append('Template ID '+str(id)+' not found')
 				except:
 					errors.append('Illegal Template ID \'' + id +
@@ -301,16 +302,14 @@ class Alignment_Tab(Tab):
 				t.template = db.get_template_by_sequence(str(t.var.get()))
 
 		# Get enabled instances
-		count = 0
-		for instance in self.method_instances:
-			if instance['is_enabled'].get() == 0 or \
-				instance['is_enabled'].get()=='0':
-				continue
-			count += 1
+		# count = 0
+		# for instance in self.method_instances:
+		# 	if instance['is_enabled'].get() in [0,'0']:
+		# 		continue
+		# 	count += 1
 
 		for instance in self.method_instances:
-			if instance['is_enabled'].get() == 0 or \
-				instance['is_enabled'].get()=='0':
+			if instance['is_enabled'].get() in [0,'0']:
 				continue
 			method = instance['name']
 			try:
@@ -348,12 +347,13 @@ class Alignment_Tab(Tab):
 				except:
 					pass
 
-			print library_templates
 			alignment = al.Alignment(method, parameters, library_templates)
-					
+			print library_templates
+			print parameters	
 		for lib in self.library_dictionary:
 			globals.method_instances = self.method_instances
 			globals.library_dictionary = self.library_dictionary
+
 
 		try:
 			self.go_button["state"] = "disabled"
@@ -551,6 +551,17 @@ class Alignment_Tab(Tab):
 					val.datatype = info['datatype']
 				except:
 					pass
+			elif type == 'Radiobutton':
+				options = info['options']
+				val = Frame(line)
+				if len(options.items())==0:
+					continue
+				for a, b in options.items():
+					if not variable.get():
+						variable.set(b)
+					b = Radiobutton(val, text=a, value=b, 
+						variable=variable)
+					b.pack(side=TOP, padx=0, anchor='w')	
 			else:
 				continue
 
@@ -558,7 +569,10 @@ class Alignment_Tab(Tab):
 			instance['parameters'][info['name']] = val.variable
 			if hasattr(val,'datatype'):
 				instance['parameters'][info['name']].datatype = val.datatype
-			val['state'] = DISABLED
+			try:
+				val['state'] = DISABLED
+			except:
+				pass
 			line.pack(side=TOP, fill=BOTH, padx=5)
 			text.pack(side=LEFT, fill=Y)
 			val.pack(side=RIGHT, fill=Y)
@@ -577,10 +591,14 @@ class Alignment_Tab(Tab):
 		frame.widgets[0].checked = not frame.widgets[0].checked
 		if frame.widgets[0].checked:
 			for widget in frame.widgets[1:]:
-				widget['state'] = NORMAL
+				try:
+					widget['state'] = NORMAL
+				except:pass
 		else:
 			for widget in frame.widgets[1:]:
-				widget['state'] = DISABLED
+				try:
+					widget['state'] = DISABLED
+				except:pass
 
 	def init_dropdown(self, some_var, item):
 		"""

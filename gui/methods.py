@@ -3,37 +3,46 @@ methods = {
 		'short':'PM',
 		'parameters': {
 				'Mismatch Quality Threshold': {
-					'type':'Entry',
+						'type':'Entry',
 					'datatype':'int',
-					'name':'mismatch_quality_threshold'
+						'name':'mismatch_quality_threshold'
 				},
 				'Variant Quality Threshold': {
-					'type':'Entry',
+						'type':'Entry',
 					'datatype':'int',
-					'name':'variant_sequence_quality_threshold'
+						'name':'variant_sequence_quality_threshold'
 				}
 			}
 		},
+		
 	'Bowtie_Aligner': {
 		'short':'BT',
 		'parameters': {
 				'Local alignment': {
-					'type':'Checkbutton',
-					'name':'bt1'
+						'type':'Checkbutton',
+						'name':'is_local'
 				},
-				'Match using elimination': {
-					'type':'Checkbutton',
-                    'datatype':'str',
-					'name':'bt2'
-				},
+				# 'Reference Name': {
+    # 					'type':'Entry',
+    #                 'datatype':'str',
+				# 		'name':'reference_name'
+				# },
 				'Total Quality Score Threshold': {
-					'type':'Entry',
+						'type':'Entry',
 					'datatype':'float',
-					'name':'bt3'
+						'name':'quality_threshold'
 				},
 				'Allow insertions/deletions': {
-					'type':'Checkbutton',
-					'name':'bt4'
+						'type':'Checkbutton',
+						'name':'allow_insertions_deletions'
+				},
+				'Alignment approach':{
+						'type':'Radiobutton',
+						'name':'approach',
+					 'options':{
+					 	'Eliminate NNK from template':'elimination',
+					 	'Mismatch Strategy':'mismatch'
+					 }
 				}
 			}
 		}
