@@ -296,6 +296,8 @@ class Alignment_Tab(Tab):
 
 		# Create templates or get them from database
 		for t in self.template_lines:
+			if str(t.var.get()) == '':
+				continue
 			try:
 				t.template = tp.Template(str(t.var.get()))
 			except:

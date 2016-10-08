@@ -42,7 +42,7 @@ class Application(Frame):
         self.current_selection = []
         
         if master:
-            master.minsize(width=600, height=600)
+            master.minsize(width=600, height=400)
         self.headerFont = tkFont.Font(size=14)
         self.listFont = tkFont.Font(size=12)
 

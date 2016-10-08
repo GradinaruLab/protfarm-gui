@@ -21,6 +21,7 @@ from workspace import Alignment as al
 from workspace import Database as db
 from analysis import enrichment as enrichment_analysis
 from analysis import amino_acids as amino_acid_analysis
+from analysis import coverage as coverage_analysis
 from ml import feature_analysis
 from Tab import *
 import matplotlib.pyplot as plt
@@ -67,10 +68,10 @@ class Analysis_Tab(Tab):
 
 		frame = Frame(self.enrichment_frame)
 		height = self.winfo_screenheight()
-		self.libraries_of_interest = self.scroll_area(frame, height=height*0.3)
+		self.libraries_of_interest = self.scroll_area(frame, height=height*0.2)
 		frame.grid(row=1, column=1, sticky='news')	
 		frame = Frame(self.specificity_frame)
-		self.libraries_to_compare = self.scroll_area(frame, height=height*0.3)
+		self.libraries_to_compare = self.scroll_area(frame, height=height*0.2)
 		frame.grid(row=0, column=1, sticky='news')
 
 		self.libraries_of_interest.bind('<Button-4>', self.scroll)
@@ -91,7 +92,7 @@ class Analysis_Tab(Tab):
 
 		browse_button = Button(self.enrichment_frame, text='Browse \nLibraries',
 			command=lambda: self.display_libraries([self.libraries_of_interest]))
-		browse_button.grid(row=2, column=0, sticky='ne')
+		browse_button.grid(row=1, column=0, sticky='s')
 
 		self.enrichment_frame.grid(row=1, column=0, sticky='news', pady=5, padx=5)
 
@@ -107,7 +108,7 @@ class Analysis_Tab(Tab):
 
 		browse_button = Button(self.specificity_frame, text = 'Browse \nLibraries',
 			command=lambda: self.display_libraries([self.libraries_to_compare]))
-		browse_button.grid(row=1, column=0, sticky='ne')
+		browse_button.grid(row=0, column=0, sticky='s')
 
 		self.specificity_frame.grid(row=2, column=0, sticky='news', pady=5, padx=5)
 
@@ -219,6 +220,11 @@ class Analysis_Tab(Tab):
 				command = self.plot_amino_acid_property_distribution)
 
 		self.plot_amino_acid_property_distribution_btn.pack(side='top', fill='both', padx=5, pady=5)
+
+		self.coverage_analysis_btn = \
+			Button(nice_button_wrapper, text='Analyze Library Coverage', \
+				command = self.analyze_coverage)
+		self.coverage_analysis_btn.pack(side='top', fill='both', padx=5, pady = 5)
 
 		Grid.columnconfigure(self, 0, weight=1)		
 		nice_button_wrapper.grid(column=3, row=2, sticky='se', padx=5, pady=5)
@@ -354,10 +360,41 @@ class Analysis_Tab(Tab):
 
 		amino_acid_charact_matrix_high_enrich = amino_acid_analysis.generate_matrix_of_interest(above_enrichment_sequences,matrix_property=amino_acid_property)
 		amino_acid_charact_matrix_below_enrich = amino_acid_analysis.generate_matrix_of_interest(below_enrichment_sequences,matrix_property=amino_acid_property)
-		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_high_enrich,amino_acid_property,'Enriched above 0')
+		amino_acid_analysis.plot_amino_kacid_property_distribution_from_matrix(amino_acid_charact_matrix_high_enrich,amino_acid_property,'Enriched above 0')
 		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_below_enrich,amino_acid_property,'Enriched below 0')
 
 		plt.show(block=False)
+
+	def analyze_coverage(self):
+
+		try:
+			by_amino_acid = bool(self.by_amino_acid.get())
+			print by_amino_acid
+		except:
+			self.show_message('AAAAAYYAYAYAYAYAYAYA!!!!')
+			by_amino_acid = False
+
+		self.analysis_set = Analysis_Set()
+
+		starting_library = self.starting_library_dd.var.get()
+		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
+		libraries_to_compare = [str(line.name) for line in self.libraries_to_compare.winfo_children()]
+
+		if starting_library:
+			self.analysis_set.add_library(db.get_library(starting_library))
+		
+		for library in libraries_of_interest:
+			self.analysis_set.add_library(db.get_library(library))
+
+		for library in libraries_to_compare:
+			self.analysis_set.add_library(db.get_library(library))
+
+		included_sequences, excluded_sequences = coverage_analysis.get_coverage(self.analysis_set, by_amino_acid = by_amino_acid)
+
+		print(str(len(included_sequences)) + ' sequences included.')
+		print(str(len(excluded_sequences)) + ' sequences excluded.')
+		print(str(len(included_sequences) * 100.0 / (len(included_sequences) + len(excluded_sequences))) + '% coverage')
+
 
 	def export_all(self):
 
@@ -372,13 +409,18 @@ class Analysis_Tab(Tab):
 
 		if not (starting_library and libraries_of_interest and libraries_to_compare and threshold):
 			return
+
+		self.analysis_set.add_library(db.get_library(starting_library))
 		
 		for library in libraries_of_interest:
 			self.analysis_set.add_library(db.get_library(library))
 
+		for library in libraries_to_compare:
+			self.analysis_set.add_library(db.get_library(library))
+
 		filename = 'analysis.csv'
 		self.analysis_set.export_enrichment_specificity(filename,
-			starting_library, libraries_to_compare, count_threshold = self.count_threshold.get(),
+			starting_library, libraries_to_compare, count_threshold = threshold,
 			by_amino_acid = True)
 		print 'starting',  starting_library
 		print 'Threshold', self.count_threshold.get()
