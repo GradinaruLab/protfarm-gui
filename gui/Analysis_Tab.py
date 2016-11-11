@@ -389,7 +389,7 @@ class Analysis_Tab(Tab):
 		for library in libraries_to_compare:
 			self.analysis_set.add_library(db.get_library(library))
 
-		included_sequences, excluded_sequences = coverage_analysis.get_coverage(self.analysis_set, by_amino_acid = by_amino_acid)
+		included_sequences, excluded_sequences = coverage_analysis.get_coverage_sequences(self.analysis_set, by_amino_acid = by_amino_acid)
 
 		print(str(len(included_sequences)) + ' sequences included.')
 		print(str(len(excluded_sequences)) + ' sequences excluded.')
