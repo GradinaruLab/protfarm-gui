@@ -1,16 +1,11 @@
-from Tkinter import *
-import tkFileDialog
-from tkFileDialog import *
-import tkMessageBox
-import ttk
-import tkFont
+from tkinter import *
 import sys
 import glob
 import os
 import threading
 from analysis import heat
-import methods
-import globals
+from . import methods
+from . import globals
 import re
 import numpy as np
 from analysis.Analysis_Set import Analysis_Set
@@ -23,9 +18,10 @@ from analysis import enrichment as enrichment_analysis
 from analysis import amino_acids as amino_acid_analysis
 from analysis import coverage as coverage_analysis
 from ml import feature_analysis
-from Tab import *
-import matplotlib.pyplot as plt
+from .Tab import *
 import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
 import seaborn as sns
 
 from multiprocessing import Process
@@ -369,7 +365,7 @@ class Analysis_Tab(Tab):
 
 		try:
 			by_amino_acid = bool(self.by_amino_acid.get())
-			print by_amino_acid
+			print(by_amino_acid)
 		except:
 			self.show_message('AAAAAYYAYAYAYAYAYAYA!!!!')
 			by_amino_acid = False
@@ -422,10 +418,10 @@ class Analysis_Tab(Tab):
 		self.analysis_set.export_enrichment_specificity(filename,
 			starting_library, libraries_to_compare, count_threshold = threshold,
 			by_amino_acid = True)
-		print 'starting',  starting_library
-		print 'Threshold', self.count_threshold.get()
-		print 'libraries_of_interest', libraries_of_interest
-		print 'libraries_to_compare',libraries_to_compare
+		print('starting',  starting_library)
+		print('Threshold', self.count_threshold.get())
+		print('libraries_of_interest', libraries_of_interest)
+		print('libraries_to_compare',libraries_to_compare)
 
 	def add_to_frame(self, library, frame, destroy = None):
 		"""
@@ -588,5 +584,5 @@ class Analysis_Tab(Tab):
 			plt.show()
 
 		except Exception as e:
-			tkMessageBox.showinfo("",
+			messagebox.showinfo("",
 				str(e))

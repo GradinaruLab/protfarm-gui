@@ -1,5 +1,5 @@
-from Tkinter import *
-import tkFont
+from tkinter import *
+from tkinter import font
 import sys
 import glob
 import os
@@ -22,12 +22,12 @@ class Tab(Frame):
 	def __init__(self, master):
 		"""Initializes a tab"""
 		Frame.__init__(self, master)
-		self.headerFont = tkFont.Font(size=14)
-		self.listFont = tkFont.Font(size=12)
+		self.headerFont = font.Font(size=14)
+		self.listFont = font.Font(size=12)
 
 	def save_dialog(self):
 		somefile = asksaveasfile(mode='w')
-		print somefile, type(somefile)
+		print(somefile, type(somefile))
 
 	def resize_x(self, event):
 		"""
@@ -154,11 +154,11 @@ class Tab(Frame):
 			message = [message]
 		mtype = mtype.upper()
 		if mtype == 'ERROR':
-			tkMessageBox.showerror(mtype, '\n\n'.join(message))
+			messagebox.showerror(mtype, '\n\n'.join(message))
 		elif mtype == 'WARNING':
-			tkMessageBox.showerror(mtype, '\n\n'.join(message))
+			messagebox.showerror(mtype, '\n\n'.join(message))
 		elif mtype == 'INFO':
-			tkMessageBox.showinfo(mtype, '\n\n'.join(message))
+			messagebox.showinfo(mtype, '\n\n'.join(message))
 
 	def resize_bar(self, frame, orient='x', size=3, bg='#1f1f1f'):
 		"""

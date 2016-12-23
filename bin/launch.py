@@ -1,9 +1,7 @@
-from Tkinter import *
-import tkFileDialog
-import tkMessageBox
-from tkFileDialog import *
-import ttk
-import tkFont
+from tkinter import *
+import tkinter.filedialog
+from tkinter import ttk
+from tkinter import font
 import sys
 import glob
 import os
@@ -18,8 +16,6 @@ from workspace import Library as lb
 from workspace import Template as tp
 from workspace import Alignment as al
 from workspace import Database as db
-
-from tkFileDialog import askopenfilename
 
 
 class Application(Frame):
@@ -43,8 +39,8 @@ class Application(Frame):
         
         if master:
             master.minsize(width=600, height=400)
-        self.headerFont = tkFont.Font(size=14)
-        self.listFont = tkFont.Font(size=12)
+        self.headerFont = font.Font(size=14)
+        self.listFont = font.Font(size=12)
 
         self.notebook = ttk.Notebook(master)
         self.alignment_tab = Alignment_Tab(self.notebook)
@@ -71,7 +67,7 @@ class Application(Frame):
                 pass
 
 root = Tk()
-root.attributes('-zoomed', True)
+#root.attributes('-zoomed', True)
 
 root.wm_title('CLOVERbot')
 
@@ -79,7 +75,7 @@ root.wm_title('CLOVERbot')
 if len(sys.argv) > 1:
     directory = sys.argv[1]
 else:
-    directory = tkFileDialog.askdirectory()
+    directory = filedialog.askdirectory()
 
 if directory:
     ws.set_workspace_path(directory)

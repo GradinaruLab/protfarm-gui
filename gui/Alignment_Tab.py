@@ -1,16 +1,13 @@
-from Tkinter import *
-import tkFileDialog
-from tkFileDialog import *
-import tkMessageBox
-import ttk
-import tkFont
+from tkinter import *
+from tkinter.ttk import *
+from tkinter import font
 import sys
 import glob
 import os
 import threading
 from analysis import heat
-import methods
-import globals
+from . import methods
+from . import globals
 import re
 import numpy as np
 from workspace import Workspace as ws
@@ -18,7 +15,7 @@ from workspace import Library as lb
 from workspace import Template as tp
 from workspace import Alignment as al
 from workspace import Database as db
-from Tab import *
+from .Tab import *
 
 class Alignment_Tab(Tab):
 
@@ -65,7 +62,7 @@ class Alignment_Tab(Tab):
 		line = Frame(self.first_left_frame, pady=4, bd=1, relief=SUNKEN)
 		pocket = Frame(line)
 		self.template = Entry(pocket, textvariable = var,
-			font = tkFont.Font(family="Courier", size=11))
+			font = font.Font(family="Courier", size=11))
 		self.template.pack(fill='both')
 		Label(line, text='Template ID: ' +
 			  str(globals.next_template_seed), bg='white').pack(anchor='w')
@@ -187,7 +184,7 @@ class Alignment_Tab(Tab):
 		self.right_frame.place(relwidth=1 - ratio, relheight=1.0,
 							   relx=ratio, rely=0.0)
 	def reset_libraries(self):
-		if not tkMessageBox.askokcancel("WARNING", "Are you sure you want to reset" +
+		if not messagebox.askokcancel("WARNING", "Are you sure you want to reset" +
 			" libraries? All unsaved library changes will be lost."):
 			return
 
@@ -205,7 +202,7 @@ class Alignment_Tab(Tab):
 
 		line = Frame(self.first_left_frame, pady=4, bd=1, relief=SUNKEN)
 		pocket = Frame(line)
-		template = Entry(pocket, textvariable=var, font = tkFont.Font(
+		template = Entry(pocket, textvariable=var, font = font.Font(
 			family = "Courier", size=12))
 		template.pack(fill='both')
 
@@ -228,25 +225,25 @@ class Alignment_Tab(Tab):
 		self.template_window.title('Templates')
 		n = len(db.get_templates())
 		Label(self.template_window, text = str('ID'), bg = 'white',
-			font=tkFont.Font(size=14, weight='bold'))\
+			font=font.Font(size=14, weight='bold'))\
 			.grid(row = 0, column = 0, padx = 2, pady = 2, sticky = 'news')
 		Label(self.template_window, text = str('Sequence'),
-			font = tkFont.Font(size=14, weight='bold'), bg = 'white')\
+			font = font.Font(size=14, weight='bold'), bg = 'white')\
 			.grid(row = 0, column = 1, padx = 2, pady = 2, sticky = 'news')		
 		i = 1
 		for template in db.get_templates():
 			Label(self.template_window, text = str(template.id), bg = 'white',
-				font = tkFont.Font(family='Courier'))\
+				font = font.Font(family='Courier'))\
 				.grid(row = i, column = 0, padx = 2, pady = 2, sticky ='news')
 			Label(self.template_window, text = str(template.sequence),
-				bg = 'white', font = tkFont.Font(family='Courier'))\
+				bg = 'white', font = font.Font(family='Courier'))\
 				.grid(row = i, column = 1, padx = 2, pady = 2, sticky='news')
 			i += 1
 
 	def update_progress(self, text):
 
 		self._progress_text = text
-		print text
+		print(text)
 		self.progress_label["text"] = self._progress_text
 
 	def check_alignment_progress(self):
@@ -260,7 +257,7 @@ class Alignment_Tab(Tab):
 
 		# Check if all libraries have been assigned to existing templates
 		errors = []
-		for name, lib in self.library_dictionary.iteritems():
+		for name, lib in self.library_dictionary.items():
 			if name == '(Select)':
 				continue
 
@@ -286,7 +283,7 @@ class Alignment_Tab(Tab):
 		for i, dropdown in enumerate(self.library_selection_menus):
 			if dropdown.selected_lib.get() == '(Select)':
 				errors.append(self.fastq_files[i])
-		if errors and not tkMessageBox.askokcancel('Warning', 'The following files have' +
+		if errors and not messagebox.askokcancel('Warning', 'The following files have' +
 			' not been assigned to a library.\n\n' + '\n'.join(errors) +
 			'\nAre you sure you want to continue?'):
 			return
@@ -318,14 +315,14 @@ class Alignment_Tab(Tab):
 				parameters = {name:(int(value.get())
 					if (hasattr(value,'datatype') and value.datatype=='int')\
 					else value.get())\
-					for name, value in instance['parameters'].iteritems()}
+					for name, value in instance['parameters'].items()}
 			except Error as e:
-				tkMessageBox.showerror(str(e))
+				messagebox.showerror(str(e))
 				return
 			library_templates = {}
 
-			for name, info in self.library_dictionary.iteritems():
-				print name, info
+			for name, info in self.library_dictionary.items():
+				print(name, info)
 				if name == '(Select)':
 					continue
 				try:
@@ -335,23 +332,23 @@ class Alignment_Tab(Tab):
 				library.fastq_files = info['files']
 				try:
 					id = info['template'].get()
-					print 'id',id
+					print('id',id)
 					if int(id) >= previous_next_template_id:
 						for t in self.template_lines:
-							print 't.id:', t.id, ', id:',id, name
+							print('t.id:', t.id, ', id:',id, name)
 							if int(t.id) == int(id):
-								print library.name, t.template.id
+								print(library.name, t.template.id)
 								library_templates[library.id] = t.template.id
 								break
 					else:
-						print library.name, 'id:',id
+						print(library.name, 'id:',id)
 						library_templates[library.id] = int(id)
 				except:
 					pass
 
 			alignment = al.Alignment(method, parameters, library_templates)
-			print library_templates
-			print parameters	
+			print(library_templates)
+			print(parameters)
 		for lib in self.library_dictionary:
 			globals.method_instances = self.method_instances
 			globals.library_dictionary = self.library_dictionary
@@ -362,8 +359,8 @@ class Alignment_Tab(Tab):
 			Threaded_Aligner(self).start()
 			self.master.after(100, self.check_alignment_progress)
 		except Exception as e:
-			print str(e)
-			tkMessageBox.showinfo("Exception", str(e))
+			print(str(e))
+			messagebox.showinfo("Exception", str(e))
 			self.go_button["state"] = "normal"
 
 	def add_existing_libraries(self):
@@ -423,7 +420,7 @@ class Alignment_Tab(Tab):
 		Grid.columnconfigure(inner_frame, 2, weight=1)
 
 		inner_frame.pack(side=TOP, fill=BOTH)
-		frame.grid(row=length / 3, column=length %
+		frame.grid(row=int(length / 3), column=length %
 				   3, ipadx=5, ipady=5, sticky='news')
 
 		for i, dropdown in enumerate(self.library_selection_menus):
@@ -450,7 +447,7 @@ class Alignment_Tab(Tab):
 
 	def remove_frame(self, frame, library, force_delete = False):
 		if library in self.db_libraries and not force_delete:
-			if not tkMessageBox.askokcancel('Warning', 'Are you sure you want'+
+			if not messagebox.askokcancel('Warning', 'Are you sure you want'+
 				' to remove' + library + ' from your libraries? All alignment'+
 				' data will be' + ' lost.\nYou can undo this action by' +
 				' clicking the Reset' + ' button before you align.'):
@@ -484,7 +481,7 @@ class Alignment_Tab(Tab):
 		try:
 			if old_lib in self.db_libraries\
 				and old_lib == db.get_associated_library(file).name:
-				if not tkMessageBox.askokcancel("Warning",
+				if not messagebox.askokcancel("Warning",
 					'Are you sure you want to change'
 				+ ' the library for '+file+'? All aligment data for the'
 				+ ' subsequent' + ' libraries will be deleted?'):
@@ -536,7 +533,7 @@ class Alignment_Tab(Tab):
 		lab.bind("<space>", self.disable_method)
 		frame.widgets = [lab]
 		lab.pack(side=TOP, fill=Y)
-		for parameter, info in sorted(params.iteritems()):
+		for parameter, info in sorted(params.items()):
 			type = info['type']
 			line = Frame(frame, highlightcolor='red',
 						 highlightbackground='red')
@@ -616,13 +613,13 @@ class Alignment_Tab(Tab):
 			name = old_lib
 		if name in self.db_libraries \
 			and name == db.get_associated_library(item).name \
-			and not tkMessageBox.askokcancel("Warning",
+			and not messagebox.askokcancel("Warning",
 						'Are you sure you want to change the library for ' + \
 						item + '? All aligment data for the subsequent'
 						+ ' library will be deleted when you run alignment'):
 			self.library_selection_menus[index].selected_lib.set(name)
 			return
-		for name, lib in self.library_dictionary.iteritems():
+		for name, lib in self.library_dictionary.items():
 			files = lib['files']
 			if str(item) in files or unicode(item):
 				if name == old_lib == some_var:
@@ -638,9 +635,9 @@ class Alignment_Tab(Tab):
 					)[self.libraries.index(old_lib) - 1]
 					library_box.winfo_children()[1 + old_index].destroy()
 				except KeyError:
-					print 'KeyError'
+					print('KeyError')
 				except ValueError:
-					print 'ValueError'
+					print('ValueError')
 
 	def append_files(self, items):
 

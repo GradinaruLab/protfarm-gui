@@ -1,16 +1,12 @@
-from Tkinter import *
-import tkFileDialog
-from tkFileDialog import *
-import tkMessageBox
-import ttk
-import tkFont
+from tkinter import *
+from tkinter import font
 import sys
 import glob
 import os
 import threading
 from analysis import heat
-import methods
-import globals
+from . import methods
+from . import globals
 import re
 import numpy as np
 from decimal import *
@@ -19,7 +15,7 @@ from workspace import Library as lb
 from workspace import Template as tp
 from workspace import Alignment as al
 from workspace import Database as db
-from Tab import *
+from .Tab import *
 
 class Alignment_Statistics_Tab(Tab):
 	"""Instant of the analysis tab"""
@@ -289,7 +285,7 @@ class Alignment_Statistics_Tab(Tab):
 		libraries = self.selected_libraries[:]
 		aligns = self.selected_alignments[:]
 		self.columns = []
-		h1_font = tkFont.Font(weight=tkFont.BOLD)
+		h1_font = font.Font(weight=font.BOLD)
 
 		# If table is to be sorted by alignment
 		if self.by_alignment:
@@ -318,7 +314,7 @@ class Alignment_Statistics_Tab(Tab):
 						stats = stats[library_id]
 
 						# Loop through statistics for to put in table
-						for stat, value in stats.iteritems():
+						for stat, value in stats.items():
 
 							# If stat has not yet been displayed, add a column
 							if stat not in self.columns:
@@ -366,7 +362,7 @@ class Alignment_Statistics_Tab(Tab):
 					try:
 						stats = db.get_alignment_by_id(alignment_id).statistics
 						stats = stats[library_id]
-						for stat, value in stats.iteritems():
+						for stat, value in stats.items():
 							if stat not in self.columns:
 								self.columns.append(stat)
 								col_num = len(self.columns)-1+2
