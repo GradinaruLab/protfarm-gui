@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import sys
 import glob
 import os
@@ -247,6 +248,12 @@ class Analysis_Tab(Tab):
 			return
 
 		try:
+			enrichment_threshold = float(self.enrichment_threshold.get().strip())
+		except:
+			self.show_message('Invalid enrichment threshold: must be a number')
+			return
+		
+		try:
 			by_amino_acid = bool(self.by_amino_acid.get())
 		except:
 			by_amino_acid = True
@@ -282,7 +289,7 @@ class Analysis_Tab(Tab):
 
 			enrichments.extend(sequence_enrichments.values())
 
-		enrichment_analysis.plot_distribution(enrichments)
+		enrichment_analysis.plot_distribution(enrichments, enrichment_threshold)
 
 	def plot_amino_acid_property_distribution(self):
 
@@ -404,13 +411,13 @@ class Analysis_Tab(Tab):
 			threshold = False
 
 		if not (starting_library and libraries_of_interest and libraries_to_compare and threshold):
+			messagebox.showerror('Missing library or threshold - make sure threshold is set and there is a starting library, library of interest, and library to compare to')
 			return
 
 		self.analysis_set.add_library(db.get_library(starting_library))
 		
 		for library in libraries_of_interest:
 			self.analysis_set.add_library(db.get_library(library))
-
 		for library in libraries_to_compare:
 			self.analysis_set.add_library(db.get_library(library))
 
@@ -577,7 +584,7 @@ class Analysis_Tab(Tab):
 				heatmap.normalized_sequence_counts(
 					library=library,
 					by_amino_acid=by_amino_acid,
-					count_threshold=self.count_threshold,
+					count_threshold=int(self.count_threshold.get()),
 					filter_invalid=filter_invalid)
 				heat.heatmap.draw(heatmap,show=False)
 

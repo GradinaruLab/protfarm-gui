@@ -67,7 +67,6 @@ class Application(Frame):
                 pass
 
 root = Tk()
-#root.attributes('-zoomed', True)
 
 root.wm_title('CLOVERbot')
 
