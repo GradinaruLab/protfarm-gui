@@ -24,6 +24,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
 import seaborn as sns
+from utils.AminoAcid import AminoAcid
 
 from multiprocessing import Process
 
@@ -73,18 +74,11 @@ class Analysis_Tab(Tab):
 
 		self.libraries_of_interest.bind('<Button-4>', self.scroll)
 		self.libraries_of_interest.bind('<Button-5>', self.scroll)
-		
-		# for library in db.get_libraries():
-		# 	self.add_to_frame(library.name, self.libraries_of_interest)
 
 		# 2 - Libraries of interest
 		lab = Label(self.enrichment_frame, text='Libraries of Interest ')
 		lab.grid(row=1, column=0, sticky='nw', padx=5, pady=5)
 
-		#self.libraries_of_interest.grid(
-		#	row=1, column=1, sticky='news', padx=5, pady=5, rowspan=2)
-
-		# Grid.columnconfigure(self.enrichment_frame, 0, weight=1)
 		Grid.columnconfigure(self.enrichment_frame, 1, weight=1)
 
 		browse_button = Button(self.enrichment_frame, text='Browse \nLibraries',
@@ -97,10 +91,6 @@ class Analysis_Tab(Tab):
 		lab = Label(self.specificity_frame, text='Libraries to Compare')
 		lab.grid(row=0, column=0, sticky='nws', padx=5, pady=5)
 
-		#self.libraries_to_compare.grid(
-		#	row=0, column=1, sticky='news', padx=5, pady=5, rowspan=2)
-
-		# Grid.columnconfigure(self.specificity_frame, 0, weight=1)
 		Grid.columnconfigure(self.specificity_frame, 1, weight=1)
 
 		browse_button = Button(self.specificity_frame, text = 'Browse \nLibraries',
@@ -167,11 +157,11 @@ class Analysis_Tab(Tab):
 			textvariable = self.enrichment_threshold).grid(
 			row=6, column=1, sticky='news', padx=5, pady=5)
 
-		#10 - Amino acid characteristic
+		#10 - Amino acid properties
 		Label(frame, text='Amino acid property').grid(
 			row=7, column=0, sticky='nw', padx=5, pady=5)
 		self.amino_acid_property = StringVar()
-		self.amino_acid_property_list = ['molecular weight', 'gravy']
+		self.amino_acid_property_list = AminoAcid.properties
 		self.amino_acid_property_dropdown = OptionMenu(
 			frame, self.amino_acid_property, *self.amino_acid_property_list)
 
@@ -185,7 +175,7 @@ class Analysis_Tab(Tab):
 
 		self.amino_acid_count_heatmap_btn = Button(nice_button_wrapper,
 			text='Amino Acid Count Heatmap',
-			command=self.heatmap)
+			command=self.amino_acid_count_heatmap)
 		self.amino_acid_count_heatmap_btn.pack(side='top', fill='both', padx=5,
 			pady=5)
 
@@ -195,11 +185,11 @@ class Analysis_Tab(Tab):
 		self.position_heatmap_btn.pack(side='top', fill='both',
 			padx=5, pady=5)
 
-		self.amino_acid_characteristics_heatmap_btn = Button(\
+		self.amino_acid_properties_heatmap_btn = Button(\
 			nice_button_wrapper,
-			text='Amino Acid Characteristics Heatmap',
-			command=self.amino_acid_characteristics_heatmap)
-		self.amino_acid_characteristics_heatmap_btn.pack(side='top',
+			text='Amino Acid Properties Heatmap',
+			command=self.amino_acid_properties_heatmap)
+		self.amino_acid_properties_heatmap_btn.pack(side='top',
 			fill='both', padx=5, pady=5)
 
 		self.export_btn = Button(nice_button_wrapper, text='Export All to CSV',
@@ -363,7 +353,7 @@ class Analysis_Tab(Tab):
 
 		amino_acid_charact_matrix_high_enrich = amino_acid_analysis.generate_matrix_of_interest(above_enrichment_sequences,matrix_property=amino_acid_property)
 		amino_acid_charact_matrix_below_enrich = amino_acid_analysis.generate_matrix_of_interest(below_enrichment_sequences,matrix_property=amino_acid_property)
-		amino_acid_analysis.plot_amino_kacid_property_distribution_from_matrix(amino_acid_charact_matrix_high_enrich,amino_acid_property,'Enriched above 0')
+		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_high_enrich,amino_acid_property,'Enriched above 0')
 		amino_acid_analysis.plot_amino_acid_property_distribution_from_matrix(amino_acid_charact_matrix_below_enrich,amino_acid_property,'Enriched below 0')
 
 		plt.show(block=False)
@@ -513,13 +503,13 @@ class Analysis_Tab(Tab):
 		position_labels = range(1,analysis_set.get_sequence_length() + 1)
 		position_labels = [str(i) for i in position_labels]
 
-		heatmap = heat.heatmap(title = 'Amino Acid Position Weights',
+		heatmap = heat.heatmap(title = 'Weight of AA Positions for Predicting Enrichment of ' + libraries_of_interest_names[0],
 			data=weights, y_labels=position_labels, x_labels=feature_labels)
 
 		heat.heatmap.draw(heatmap, show=False)
 		plt.show()
 
-	def amino_acid_characteristics_heatmap(self):
+	def amino_acid_properties_heatmap(self):
 		label_threshold = 1.0
 		count_threshold = 25
 
@@ -543,23 +533,14 @@ class Analysis_Tab(Tab):
 		position_labels = range(1,analysis_set.get_sequence_length() + 1)
 		position_labels = [str(i) for i in position_labels]
 
-		heatmap = heat.heatmap(title = 'Amino Acid Characteristic Weights',
+		heatmap = heat.heatmap(title = 'Weight of AA Properties for Predicting Enrichment of ' + libraries_of_interest_names[0],
 			data=weights, y_labels=position_labels, x_labels=feature_labels)
 
 		heat.heatmap.draw(heatmap, show=False)
 		plt.show()
 
-	def heatmap(self):
+	def amino_acid_count_heatmap(self):
 		
-		# for process in self.processes:
-		# 	if process.is_alive():
-		# 		process.terminate()
-		# 	else: print process.name, 'is dead'
-
-		# for process in self.processes:
-		# 	if process.is_alive():
-		# 		process.terminate()
-		# 	else: print process.name, 'is dead'
 		by_amino_acid = True
 
 		test_size = 0.2
@@ -568,19 +549,9 @@ class Analysis_Tab(Tab):
 		libraries_of_interest = [str(line.name) for line in \
 			self.libraries_of_interest.winfo_children()]
 		try:
-			# sequence_label_dict = self.analysis_set.get_enrichment(
-			# 	self.libraries_of_interest[0], self.starting_library,
-			# 	by_amino_acid=by_amino_acid,
-			# 	count_threshold = self.count_threshold)
-
-			# sequence_matrix, label_matrix =\
-			# 	utils.convert_sequence_label_dict_to_matrices(
-			# 		sequence_label_dict)
-			# feature_descriptions, feature_matrix, amino_labels = \
-			# 	features.get_position_features(sequence_matrix)
 			for library in libraries_of_interest:
 				library = db.get_library(library)
-				heatmap = heat.heatmap(title = library.name)
+				heatmap = heat.heatmap(title = 'Amino Acid Distribution of ' + library.name)
 				heatmap.normalized_sequence_counts(
 					library=library,
 					by_amino_acid=by_amino_acid,
