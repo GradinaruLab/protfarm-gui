@@ -42,14 +42,6 @@ class Alignment_Tab(Tab):
 		self.third_left_frame.place(
 			relwidth=1.0, relheight=0.60, relx=0.0, rely=0.40)
 
-
-		# self.library_frame = Frame(
-		# 	self.third_left_frame, bg='white', padx=5, pady=5)
-
-		# height = self.third_left_frame.winfo_height()
-		# print height
-		# self.library_frame = self.scroll_area(self.third_left_frame, height = height*0.9)
-
 		# Templates
 		self.template_lines = []
 
@@ -84,7 +76,6 @@ class Alignment_Tab(Tab):
 		frame.pack(side=BOTTOM, pady=5)
 
 		# FASTQ files
-
 		Label(self.second_left_frame, text='Add files for alignment')\
 			.pack(side=TOP)
 		reset_lib_temp_btn = Button(self.second_left_frame, text = 'Reset')
@@ -122,17 +113,11 @@ class Alignment_Tab(Tab):
 
 		add_lib_btn["command"]=lambda: self.add_library(new_lib)
 
-		# self.library_frame.pack()
 		self.first_left_frame.grid(column=0, row=0, sticky='news')
 		self.layer.grid(column=0, row=1, sticky='news')
 
 		Grid.columnconfigure(self.left_frame, 0, weight=1)
 		Grid.rowconfigure(self.left_frame, 1, weight=1)
-
-		# self.second_left_frame.place(
-		# 	relwidth=1.0, relheight=0.40, relx=0.0, rely=0.0)
-		# self.third_left_frame.place(
-		# 	relwidth=1.0, relheight=0.60, relx=0.0, rely=0.40)
 
 		# Right frame
 
@@ -299,13 +284,6 @@ class Alignment_Tab(Tab):
 				t.template = tp.Template(str(t.var.get()))
 			except:
 				t.template = db.get_template_by_sequence(str(t.var.get()))
-
-		# Get enabled instances
-		# count = 0
-		# for instance in self.method_instances:
-		# 	if instance['is_enabled'].get() in [0,'0']:
-		# 		continue
-		# 	count += 1
 
 		for instance in self.method_instances:
 			if instance['is_enabled'].get() in [0,'0']:

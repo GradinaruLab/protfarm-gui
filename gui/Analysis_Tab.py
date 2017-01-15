@@ -362,9 +362,7 @@ class Analysis_Tab(Tab):
 
 		try:
 			by_amino_acid = bool(self.by_amino_acid.get())
-			print(by_amino_acid)
 		except:
-			self.show_message('AAAAAYYAYAYAYAYAYAYA!!!!')
 			by_amino_acid = False
 
 		self.analysis_set = Analysis_Set()
@@ -382,12 +380,17 @@ class Analysis_Tab(Tab):
 		for library in libraries_to_compare:
 			self.analysis_set.add_library(db.get_library(library))
 
-		included_sequences, excluded_sequences = coverage_analysis.get_coverage_sequences(self.analysis_set, by_amino_acid = by_amino_acid)
+		num_included_sequences, num_possible_sequences = coverage_analysis.get_coverage(self.analysis_set, by_amino_acid = by_amino_acid)
 
-		print(str(len(included_sequences)) + ' sequences included.')
-		print(str(len(excluded_sequences)) + ' sequences excluded.')
-		print(str(len(included_sequences) * 100.0 / (len(included_sequences) + len(excluded_sequences))) + '% coverage')
+		libraries_included_string = 'Libraries included:\n'
 
+		for library_name, library in self.analysis_set.get_libraries().items():
+			libraries_included_string += library_name + '\n'
+
+		sequences_included_string = "\n%04e sequences included\n" % num_included_sequences
+		possible_sequences_string = "%04e possible sequences.\n" % num_possible_sequences
+		coverage_string = "%06f%% coverage\n" % (num_included_sequences * 100.0 / num_possible_sequences)
+		messagebox.showinfo('Coverage analysis', libraries_included_string + sequences_included_string + possible_sequences_string + coverage_string)
 
 	def export_all(self):
 
