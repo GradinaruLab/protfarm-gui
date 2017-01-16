@@ -482,9 +482,34 @@ class Analysis_Tab(Tab):
 			line.pack(side=TOP, fill=BOTH)
 
 	def position_heatmap(self):
-		by_amino_acid = True
-		label_threshold = 1.0
-		count_threshold = 25
+
+		try:
+			count_threshold = int(self.count_threshold.get().strip())
+		except:
+			self.show_message('Invalid count threshold: must be a number')
+			return
+
+		try:
+			by_amino_acid = bool(self.by_amino_acid.get())
+		except:
+			by_amino_acid = True
+
+		try:
+			enrichment_threshold = float(self.enrichment_threshold.get().strip())
+		except:
+			self.show_message('Invalid enrichment threshold: must be a number')
+			return
+
+		try:
+			zero_count_default_value = float(self.zero_count_default_value.get().strip())
+		except:
+			self.show_message('Invalid zero count default: must be a number')
+			return
+
+		try:
+			include_zero_counts = bool(self.include_zero_counts.get())
+		except:
+			include_zero_counts = False
 
 		analysis_set = Analysis_Set()
 		starting_library_name = self.starting_library_dd.var.get()
@@ -497,24 +522,51 @@ class Analysis_Tab(Tab):
 		for library_of_interest_name in libraries_of_interest_names:
 			analysis_set.add_library(db.get_library(library_of_interest_name))
 
-		weights, feature_labels = \
-			feature_analysis.get_position_feature_weights(analysis_set,
-			starting_library = starting_library_name,
-			library_of_interest = libraries_of_interest_names[0],
-			by_amino_acid = by_amino_acid, count_threshold = count_threshold)
+		for library_of_interest_name in libraries_of_interest_names:
 
-		position_labels = range(1,analysis_set.get_sequence_length() + 1)
-		position_labels = [str(i) for i in position_labels]
+			sequence_enrichments = analysis_set.get_enrichment(library_of_interest_name,
+				starting_library_name, by_amino_acid=by_amino_acid,
+				count_threshold=count_threshold, include_zero_count = include_zero_counts,
+				zero_count_magic_number = zero_count_default_value)
 
-		heatmap = heat.heatmap(title = 'Weight of AA Positions for Predicting Enrichment of ' + libraries_of_interest_names[0],
-			data=weights, y_labels=position_labels, x_labels=feature_labels)
+			weights, feature_labels = \
+				feature_analysis.get_position_feature_weights(sequence_enrichments,
+				label_threshold = enrichment_threshold)
 
-		heat.heatmap.draw(heatmap, show=False)
+			position_labels = range(1,analysis_set.get_sequence_length() + 1)
+			position_labels = [str(i) for i in position_labels]
+
+			heatmap = heat.heatmap(title = 'Weight of AA Positions for Predicting Enrichment of ' + library_of_interest_name,
+				data=weights, y_labels=position_labels, x_labels=feature_labels)
+
+			heat.heatmap.draw(heatmap, show=False)
+
 		plt.show()
 
 	def amino_acid_properties_heatmap(self):
-		label_threshold = 1.0
-		count_threshold = 25
+
+		try:
+			count_threshold = int(self.count_threshold.get().strip())
+		except:
+			self.show_message('Invalid count threshold: must be a number')
+			return
+
+		try:
+			enrichment_threshold = float(self.enrichment_threshold.get().strip())
+		except:
+			self.show_message('Invalid enrichment threshold: must be a number')
+			return
+
+		try:
+			zero_count_default_value = float(self.zero_count_default_value.get().strip())
+		except:
+			self.show_message('Invalid zero count default: must be a number')
+			return
+
+		try:
+			include_zero_counts = bool(self.include_zero_counts.get())
+		except:
+			include_zero_counts = False
 
 		analysis_set = Analysis_Set()
 		starting_library_name = self.starting_library_dd.var.get()
@@ -527,26 +579,36 @@ class Analysis_Tab(Tab):
 		for library_of_interest_name in libraries_of_interest_names:
 			analysis_set.add_library(db.get_library(library_of_interest_name))
 
-		weights, feature_labels = \
-			feature_analysis.get_amino_acid_characteristics_feature_weights(\
-			analysis_set, starting_library = starting_library_name,
-			library_of_interest = libraries_of_interest_names[0],
-			count_threshold = count_threshold)
+		for library_of_interest_name in libraries_of_interest_names:
 
-		position_labels = range(1,analysis_set.get_sequence_length() + 1)
-		position_labels = [str(i) for i in position_labels]
+			sequence_enrichments = analysis_set.get_enrichment(library_of_interest_name,
+				starting_library_name, by_amino_acid=True, count_threshold=count_threshold,
+				include_zero_count = include_zero_counts,
+				zero_count_magic_number = zero_count_default_value)
 
-		heatmap = heat.heatmap(title = 'Weight of AA Properties for Predicting Enrichment of ' + libraries_of_interest_names[0],
-			data=weights, y_labels=position_labels, x_labels=feature_labels)
+			weights, feature_labels = \
+				feature_analysis.get_amino_acid_characteristics_feature_weights(
+					sequence_enrichments, label_threshold = enrichment_threshold)
 
-		heat.heatmap.draw(heatmap, show=False)
+			position_labels = range(1,analysis_set.get_sequence_length() + 1)
+			position_labels = [str(i) for i in position_labels]
+
+			heatmap = heat.heatmap(title = 'Weight of AA Properties for Predicting Enrichment of ' + library_of_interest_name,
+				data=weights, y_labels=position_labels, x_labels=feature_labels)
+
+			heat.heatmap.draw(heatmap, show=False)
 		plt.show()
 
 	def amino_acid_count_heatmap(self):
+
+		try:
+			count_threshold = int(self.count_threshold.get().strip())
+		except:
+			self.show_message('Invalid count threshold: must be a number')
+			return
 		
 		by_amino_acid = True
 
-		test_size = 0.2
 		filter_invalid = False
 
 		libraries_of_interest = [str(line.name) for line in \
@@ -558,7 +620,7 @@ class Analysis_Tab(Tab):
 				heatmap.normalized_sequence_counts(
 					library=library,
 					by_amino_acid=by_amino_acid,
-					count_threshold=int(self.count_threshold.get()),
+					count_threshold=count_threshold,
 					filter_invalid=filter_invalid)
 				heat.heatmap.draw(heatmap,show=False)
 
