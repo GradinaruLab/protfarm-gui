@@ -70,6 +70,7 @@ root = Tk()
 
 root.wm_title('CLOVERbot')
 
+root.update()
 
 if len(sys.argv) > 1:
     directory = sys.argv[1]
