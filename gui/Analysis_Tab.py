@@ -533,7 +533,7 @@ class Analysis_Tab(Tab):
 				feature_analysis.get_position_feature_weights(sequence_enrichments,
 				label_threshold = enrichment_threshold)
 
-			position_labels = range(1,analysis_set.get_sequence_length() + 1)
+			position_labels = reversed(range(1,analysis_set.get_sequence_length() + 1))
 			position_labels = [str(i) for i in position_labels]
 
 			heatmap = heat.heatmap(title = 'Weight of AA Positions for Predicting Enrichment of ' + library_of_interest_name,
@@ -568,6 +568,11 @@ class Analysis_Tab(Tab):
 		except:
 			include_zero_counts = False
 
+		try:
+			log_scale = bool(self.log_scale.get())
+		except:
+			log_scale = True
+
 		analysis_set = Analysis_Set()
 		starting_library_name = self.starting_library_dd.var.get()
 
@@ -584,13 +589,16 @@ class Analysis_Tab(Tab):
 			sequence_enrichments = analysis_set.get_enrichment(library_of_interest_name,
 				starting_library_name, by_amino_acid=True, count_threshold=count_threshold,
 				include_zero_count = include_zero_counts,
-				zero_count_magic_number = zero_count_default_value)
+				zero_count_magic_number = zero_count_default_value,
+				Log_Scale = log_scale)
+
+			print('Got enrichment for %i sequences' % len(sequence_enrichments))
 
 			weights, feature_labels = \
 				feature_analysis.get_amino_acid_characteristics_feature_weights(
 					sequence_enrichments, label_threshold = enrichment_threshold)
 
-			position_labels = range(1,analysis_set.get_sequence_length() + 1)
+			position_labels = reversed(range(1,analysis_set.get_sequence_length() + 1))
 			position_labels = [str(i) for i in position_labels]
 
 			heatmap = heat.heatmap(title = 'Weight of AA Properties for Predicting Enrichment of ' + library_of_interest_name,
