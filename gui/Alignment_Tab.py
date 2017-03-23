@@ -147,7 +147,7 @@ class Alignment_Tab(Tab):
 		self.add_method_button = Button(frame, text='Add Method',
 										command=lambda: self.add_method(
 											[var.get(),
-											methods.methods[var.get()]]))
+											methods.methods[(var.get())]]))
 
 		self.method_menu.pack(side=LEFT, pady=5, padx=5)
 		self.add_method_button.pack(side=LEFT, pady=5, padx=5)
@@ -557,7 +557,7 @@ class Alignment_Tab(Tab):
 			frame.widgets.append(val)
 
 		frame.grid(column=index % self.number_of_columns,
-				   row=index / self.number_of_columns, padx=5, pady=5, ipadx=5,
+				   row=int(index / self.number_of_columns), padx=5, pady=5, ipadx=5,
 				   ipady=5, sticky='WNES')
 		self.method_parameters.append(frame)
 		self.method_instances.append(instance)
