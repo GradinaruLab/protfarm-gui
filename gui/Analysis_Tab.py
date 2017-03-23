@@ -202,6 +202,12 @@ class Analysis_Tab(Tab):
 		self.plot_enrichment_distribution_btn.pack(side='top', fill='both',
 			padx=5, pady = 5)
 
+		self.plot_specificity_distribution_btn = \
+			Button(nice_button_wrapper, text='Plot Specificity Distribution', \
+				command= self.plot_specificity_distribution)
+		self.plot_specificity_distribution_btn.pack(side='top', fill='both',
+			padx=5, pady = 5)
+
 		self.plot_amino_acid_property_distribution_btn = \
 			Button(nice_button_wrapper, text='Plot Amino Acid Property Distribution', \
 				command = self.plot_amino_acid_property_distribution)
@@ -280,6 +286,44 @@ class Analysis_Tab(Tab):
 			enrichments.extend(sequence_enrichments.values())
 
 		enrichment_analysis.plot_distribution(enrichments, enrichment_threshold)
+
+	def plot_specificity_distribution(self):
+
+		self.analysis_set = Analysis_Set()
+		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
+		libraries_to_compare = [str(line.name) for line in self.libraries_to_compare.winfo_children()]
+
+		try:
+			threshold = int(self.count_threshold.get().strip())
+		except:
+			self.show_message('Invalid count threshold: must be a number')
+			return
+
+		try:
+			specificity_threshold = float(self.enrichment_threshold.get().strip())
+		except:
+			self.show_message('Invalid specificity threshold: must be a number')
+			return
+		
+		try:
+			by_amino_acid = bool(self.by_amino_acid.get())
+		except:
+			by_amino_acid = True
+		
+		for library in libraries_of_interest:
+			self.analysis_set.add_library(db.get_library(library))
+		for library in libraries_to_compare:
+			self.analysis_set.add_library(db.get_library(library))
+
+		sequence_specificities = self.analysis_set.get_specificity( \
+			libraries_of_interest, libraries_to_compare, count_threshold=threshold,
+			by_amino_acid = by_amino_acid)
+		
+		sns.distplot(list(sequence_specificities.values()),bins=100,kde=False,rug=False)
+		plt.xlabel('specificity')
+		plt.ylabel('sequence counts')
+		plt.axvline(threshold)
+		plt.show()
 
 	def plot_amino_acid_property_distribution(self):
 
