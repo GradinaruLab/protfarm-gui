@@ -304,11 +304,27 @@ class Analysis_Tab(Tab):
 		except:
 			self.show_message('Invalid specificity threshold: must be a number')
 			return
+
+		try:
+			zero_count_default_value = float(self.zero_count_default_value.get().strip())
+		except:
+			self.show_message('Invalid zero count default: must be a number')
+			return
+
+		try:
+			include_zero_counts = bool(self.include_zero_counts.get())
+		except:
+			include_zero_counts = False
 		
 		try:
 			by_amino_acid = bool(self.by_amino_acid.get())
 		except:
 			by_amino_acid = True
+
+		try:
+			log_scale = bool(self.log_scale.get())
+		except:
+			log_scale = True
 		
 		for library in libraries_of_interest:
 			self.analysis_set.add_library(db.get_library(library))
@@ -317,12 +333,13 @@ class Analysis_Tab(Tab):
 
 		sequence_specificities = self.analysis_set.get_specificity( \
 			libraries_of_interest, libraries_to_compare, count_threshold=threshold,
-			by_amino_acid = by_amino_acid)
+			by_amino_acid = by_amino_acid, log_scale = log_scale,
+			zero_count_magic_number = zero_count_default_value)
 		
 		sns.distplot(list(sequence_specificities.values()),bins=100,kde=False,rug=False)
 		plt.xlabel('specificity')
 		plt.ylabel('sequence counts')
-		plt.axvline(threshold)
+		plt.axvline(specificity_threshold)
 		plt.show()
 
 	def plot_amino_acid_property_distribution(self):
