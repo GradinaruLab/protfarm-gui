@@ -123,7 +123,7 @@ class Analysis_Tab(Tab):
 		Label(frame, text='Zero Count Default Value').grid(
 			row=2, column=0, sticky='nw', padx=5, pady=5)
 		self.zero_count_default_value = StringVar()
-		self.zero_count_default_value.set('0.9')
+		self.zero_count_default_value.set('')
 		self.zero_count_default_value_entry = Entry(frame, \
 			textvariable = self.zero_count_default_value).grid(
 			row=2, column=1, sticky='news', padx=5, pady=5)
@@ -254,11 +254,15 @@ class Analysis_Tab(Tab):
 		except:
 			by_amino_acid = True
 
-		try:
-			zero_count_default_value = float(self.zero_count_default_value.get().strip())
-		except:
-			self.show_message('Invalid zero count default: must be a number')
-			return
+
+		if self.zero_count_default_value.get().strip() == "":
+			zero_count_default_value = None
+		else:
+			try:
+				zero_count_default_value = float(self.zero_count_default_value.get().strip())
+			except:
+				self.show_message('Invalid zero count default: must be a number')
+				return
 
 		try:
 			include_zero_counts = bool(self.include_zero_counts.get())
@@ -305,11 +309,14 @@ class Analysis_Tab(Tab):
 			self.show_message('Invalid specificity threshold: must be a number')
 			return
 
-		try:
-			zero_count_default_value = float(self.zero_count_default_value.get().strip())
-		except:
-			self.show_message('Invalid zero count default: must be a number')
-			return
+		if self.zero_count_default_value.get().strip() == "":
+			zero_count_default_value = None
+		else:
+			try:
+				zero_count_default_value = float(self.zero_count_default_value.get().strip())
+			except:
+				self.show_message('Invalid zero count default: must be a number')
+				return
 
 		try:
 			include_zero_counts = bool(self.include_zero_counts.get())
@@ -363,11 +370,14 @@ class Analysis_Tab(Tab):
 		except:
 			by_amino_acid = True
 
-		try:
-			zero_count_default_value = float(self.zero_count_default_value.get().strip())
-		except:
-			self.show_message('Invalid zero count default: must be a number')
-			return
+		if self.zero_count_default_value.get().strip() == "":
+			zero_count_default_value = None
+		else:
+			try:
+				zero_count_default_value = float(self.zero_count_default_value.get().strip())
+			except:
+				self.show_message('Invalid zero count default: must be a number')
+				return
 
 		try:
 			include_zero_counts = bool(self.include_zero_counts.get())
@@ -561,11 +571,14 @@ class Analysis_Tab(Tab):
 			self.show_message('Invalid enrichment threshold: must be a number')
 			return
 
-		try:
-			zero_count_default_value = float(self.zero_count_default_value.get().strip())
-		except:
-			self.show_message('Invalid zero count default: must be a number')
-			return
+		if self.zero_count_default_value.get().strip() == "":
+			zero_count_default_value = None
+		else:
+			try:
+				zero_count_default_value = float(self.zero_count_default_value.get().strip())
+			except:
+				self.show_message('Invalid zero count default: must be a number')
+				return
 
 		try:
 			include_zero_counts = bool(self.include_zero_counts.get())
@@ -618,11 +631,14 @@ class Analysis_Tab(Tab):
 			self.show_message('Invalid enrichment threshold: must be a number')
 			return
 
-		try:
-			zero_count_default_value = float(self.zero_count_default_value.get().strip())
-		except:
-			self.show_message('Invalid zero count default: must be a number')
-			return
+		if self.zero_count_default_value.get().strip() == "":
+			zero_count_default_value = None
+		else:
+			try:
+				zero_count_default_value = float(self.zero_count_default_value.get().strip())
+			except:
+				self.show_message('Invalid zero count default: must be a number')
+				return
 
 		try:
 			include_zero_counts = bool(self.include_zero_counts.get())
