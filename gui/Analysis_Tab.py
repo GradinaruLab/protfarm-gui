@@ -469,10 +469,35 @@ class Analysis_Tab(Tab):
 		starting_library = self.starting_library_dd.var.get()
 		libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
 		libraries_to_compare = [str(line.name) for line in self.libraries_to_compare.winfo_children()]
+		
 		try:
 			threshold = int(self.count_threshold.get().strip())
 		except:
 			threshold = False
+
+		try:
+			by_amino_acid = bool(self.by_amino_acid.get())
+		except:
+			by_amino_acid = False
+
+		try:
+			log_scale = bool(self.log_scale.get())
+		except:
+			log_scale = False
+
+		if self.zero_count_default_value.get().strip() == "":
+			zero_count_default_value = None
+		else:
+			try:
+				zero_count_default_value = float(self.zero_count_default_value.get().strip())
+			except:
+				self.show_message('Invalid zero count default: must be a number')
+				return
+
+		try:
+			include_zero_counts = bool(self.include_zero_counts.get())
+		except:
+			include_zero_counts = False
 
 		if not (starting_library and libraries_of_interest and libraries_to_compare and threshold):
 			messagebox.showerror('Missing library or threshold - make sure threshold is set and there is a starting library, library of interest, and library to compare to')
@@ -488,7 +513,7 @@ class Analysis_Tab(Tab):
 		filename = 'analysis.csv'
 		self.analysis_set.export_enrichment_specificity(filename,
 			starting_library, libraries_to_compare, count_threshold = threshold,
-			by_amino_acid = True)
+			by_amino_acid = by_amino_acid, log_scale = log_scale)
 		print('starting',  starting_library)
 		print('Threshold', self.count_threshold.get())
 		print('libraries_of_interest', libraries_of_interest)
