@@ -267,7 +267,7 @@ class Alignment_Tab(Tab):
 		del errors[:]
 		for i, dropdown in enumerate(self.library_selection_menus):
 			if dropdown.selected_lib.get() == '(Select)':
-				errors.append(self.fastq_files[i])
+				errors.append(self.fastq_files[i].name)
 		if errors and not messagebox.askokcancel('Warning', 'The following files have' +
 			' not been assigned to a library.\n\n' + '\n'.join(errors) +
 			'\nAre you sure you want to continue?'):
@@ -351,7 +351,7 @@ class Alignment_Tab(Tab):
 		self.library_dictionary['(Select)'] = {'files': [],
 			'template': StringVar()}
 
-		self.fastq_files = ws.get_fastq_files()[:]
+		self.fastq_files = db.get_FASTQ_files()[:]
 
 		self.append_files(self.fastq_files)
 
@@ -360,7 +360,12 @@ class Alignment_Tab(Tab):
 			fastq_files = library.fastq_files[:]
 			self.add_library(name)
 			for file in fastq_files:
-				index = self.fastq_files.index(file)
+
+				for FASTQ_file_index, FASTQ_file in enumerate(self.fastq_files):
+					if FASTQ_file.name == file:
+						index = FASTQ_file_index
+						break
+
 				self.selected_index_changed(index, name)
 
 
@@ -438,7 +443,10 @@ class Alignment_Tab(Tab):
 			index = self.libraries.index(library)
 			dropdown['menu'].delete(index, index)
 		for file in list:
-			index = self.fastq_files.index(file)
+			for FASTQ_file_index, FASTQ_file in enumerate(self.fastq_files):
+				if FASTQ_file.name == file:
+					index = FASTQ_file_index
+					break
 			self.library_selection_menus[index].selected_lib.set('')
 		self.libraries.remove(library)
 
@@ -458,10 +466,10 @@ class Alignment_Tab(Tab):
 
 		try:
 			if old_lib in self.db_libraries\
-				and old_lib == db.get_associated_library(file).name:
+				and old_lib == db.get_associated_library(file.name).name:
 				if not messagebox.askokcancel("Warning",
 					'Are you sure you want to change'
-				+ ' the library for '+file+'? All aligment data for the'
+				+ ' the library for '+file.name+'? All aligment data for the'
 				+ ' subsequent' + ' libraries will be deleted?'):
 					self.library_selection_menus[index].selected_lib\
 					.set(old_lib)
@@ -470,16 +478,16 @@ class Alignment_Tab(Tab):
 			pass
 
 		if new_lib not in ['(Select)', '']:
-			self.library_dictionary[new_lib]['files'].append(file)
+			self.library_dictionary[new_lib]['files'].append(file.name)
 			library_box = self.library_frame.winfo_children()\
 			[self.libraries.index(new_lib) - 1]
-			label = Label(library_box, text=file)
+			label = Label(library_box, text=file.name)
 			label.bind("<Button-4>",self.scroll)
 			label.bind("<Button-5>",self.scroll)
 			label.pack(side=TOP, fill=BOTH, anchor='w')
 		try:
-			old_index = self.library_dictionary[old_lib]['files'].index(file)
-			self.library_dictionary[old_lib]['files'].remove(file)
+			old_index = self.library_dictionary[old_lib]['files'].index(file.name)
+			self.library_dictionary[old_lib]['files'].remove(file.name)
 			library_box = self.library_frame.winfo_children(
 			)[self.libraries.index(old_lib) - 1]
 			library_box.winfo_children()[old_index + 1].destroy()
@@ -583,7 +591,11 @@ class Alignment_Tab(Tab):
 		some_var: Name of selected value (e.g. '(Select)')
 		item: Name of file being assigned to no library
 		"""
-		index = self.fastq_files.index(item)
+
+		for FASTQ_file_index, FASTQ_file in enumerate(self.fastq_files):
+			if FASTQ_file.name == item:
+				index = FASTQ_file_index
+				break
 		old_lib = self.library_selection_menus[index].selected_lib.get()
 		try:
 			name = db.get_associated_library(item).name
@@ -617,6 +629,9 @@ class Alignment_Tab(Tab):
 				except ValueError:
 					print('ValueError')
 
+	def set_is_complement(self, index):
+		pass
+
 	def append_files(self, items):
 
 		for i, item in enumerate(items):
@@ -625,13 +640,13 @@ class Alignment_Tab(Tab):
 			selected_lib.set(self.libraries[0])
 			dropdown = OptionMenu(self.file_wrapper, selected_lib,
 								  *self.libraries,
-								  command=lambda index=i, item=item: \
-								  self.init_dropdown(index, item))
+								  command=lambda index=i, item=item.name: \
+								  self.init_dropdown(index, item.name))
 			dropdown.selected_lib = selected_lib
 			dropdown.configure(relief=RAISED)
 			self.library_selection_menus.append(dropdown)
 
-			lab = Label(self.file_wrapper, bg='white', text=str(item),
+			lab = Label(self.file_wrapper, bg='white', text=item.name,
 						padx=10, pady=10)
 			lab.bind("<Button-4>", lambda e: self.scroll(e))
 			lab.bind("<Button-5>", lambda e: self.scroll(e))
@@ -639,6 +654,10 @@ class Alignment_Tab(Tab):
 			dropdown.bind("<Button-5>", lambda e: self.scroll(e))
 			lab.grid(column=0, row=i, sticky='news')
 			dropdown.grid(column=1, row=i, sticky='news')
+
+			is_complement_checkbutton = Checkbutton(self.file_wrapper, command=lambda index=i: self.set_is_complement(index))
+
+			is_complement_checkbutton.grid(column=2, row=i, sticky='news')
 
 			Grid.columnconfigure(self.file_wrapper, 0, weight=1)
 			Grid.columnconfigure(self.file_wrapper, 1, weight=1)
