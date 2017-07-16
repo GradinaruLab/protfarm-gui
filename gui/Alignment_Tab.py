@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 from tkinter.ttk import *
 from tkinter import font
 import sys
@@ -45,30 +46,14 @@ class Alignment_Tab(Tab):
 		# Templates
 		self.template_lines = []
 
-		Label(self.first_left_frame, text='Insert Template').pack(
+		Label(self.first_left_frame, text='New Template(s)').pack(
 			side='top', pady=10)
 
-		var = StringVar()
-		# var.set('ACGT' * 25)
-
-		line = Frame(self.first_left_frame, pady=4, bd=1, relief=SUNKEN)
-		pocket = Frame(line)
-		self.template = Entry(pocket, textvariable = var,
-			font = font.Font(family="Courier", size=11))
-		self.template.pack(fill='both')
-		Label(line, text='Template ID: ' +
-			  str(globals.next_template_seed), bg='white').pack(anchor='w')
-		line.id = globals.next_template_seed
-		line.var = var
-		pocket.pack(fill=BOTH, anchor='w')
-		globals.next_template_seed += 1
-		line.pack(fill=BOTH, pady=0)
-		self.template_lines.append(line)
+		self.add_template()
 
 		frame = Frame(self.first_left_frame)
 		add_template_btn = Button(frame, text='Add template',
-								  command=lambda: self.add_template(
-									self.first_left_frame))
+								  command=lambda: self.add_template())
 		view_templates_btn = Button(frame, text='View Existing Templates',
 			command = self.show_old_templates)
 		view_templates_btn.pack(side=RIGHT)
@@ -181,24 +166,34 @@ class Alignment_Tab(Tab):
 		# Add existing libraries
 		self.add_existing_libraries()
 
-	def add_template(self, frame):
-		var = StringVar()
-		# var.set('ACGT' * 25)
+	def add_template(self):
 
-		line = Frame(self.first_left_frame, pady=4, bd=1, relief=SUNKEN)
-		pocket = Frame(line)
-		template = Entry(pocket, textvariable=var, font = font.Font(
-			family = "Courier", size=12))
-		template.pack(fill='both')
+		template_var = StringVar()
+		reverse_complement_template_id_var = StringVar()
 
-		Label(line, text='Template ID: ' + str(globals.next_template_seed),
-			  bg='white').pack(anchor='w')
-		line.id = globals.next_template_seed
-		line.var = var
+		new_template_label_frame = Frame(self.first_left_frame, pady=4, bd=1, relief=SUNKEN)
+		Label(new_template_label_frame, text='Template ID: ' +
+			  str(globals.next_template_seed), bg='white').pack(side=LEFT)
+		Label(new_template_label_frame, text='Reverse Complement ID:', bg='white').pack(side=RIGHT)
+		new_template_label_frame.pack(fill=BOTH, pady=0)
+
+		new_template_entry_frame = Frame(self.first_left_frame, pady=4, relief=SUNKEN)
+		reverse_complement_template_id_entry = Entry(new_template_entry_frame, textvariable = reverse_complement_template_id_var,
+			font = font.Font(family="Courier", size=11), width=5)
+		reverse_complement_template_id_entry.pack(side=RIGHT)
+		template_entry = Entry(new_template_entry_frame, textvariable = template_var,
+			font = font.Font(family="Courier", size=11), width=100)
+		template_entry.pack(side=RIGHT, fill=BOTH)
+		new_template_entry_frame.pack(fill=BOTH, pady=0)
+
+
+		new_template_entry_frame.id = globals.next_template_seed
+		new_template_entry_frame.template_var = template_var
+		new_template_entry_frame.reverse_complement_template_id_var = reverse_complement_template_id_var
+
 		globals.next_template_seed += 1
-		pocket.pack(fill=BOTH, anchor='w')
-		line.pack(fill=BOTH, pady=0)
-		self.template_lines.append(line)
+
+		self.template_lines.append(new_template_entry_frame)
 
 	def show_old_templates(self):
 		"""
@@ -214,7 +209,10 @@ class Alignment_Tab(Tab):
 			.grid(row = 0, column = 0, padx = 2, pady = 2, sticky = 'news')
 		Label(self.template_window, text = str('Sequence'),
 			font = font.Font(size=14, weight='bold'), bg = 'white')\
-			.grid(row = 0, column = 1, padx = 2, pady = 2, sticky = 'news')		
+			.grid(row = 0, column = 1, padx = 2, pady = 2, sticky = 'news')
+		Label(self.template_window, text = str('Reverse Complement'),
+			font = font.Font(size=14, weight='bold'), bg = 'white')\
+			.grid(row = 0, column = 2, padx = 2, pady = 2, sticky = 'news')
 		i = 1
 		for template in db.get_templates():
 			Label(self.template_window, text = str(template.id), bg = 'white',
@@ -223,6 +221,9 @@ class Alignment_Tab(Tab):
 			Label(self.template_window, text = str(template.sequence),
 				bg = 'white', font = font.Font(family='Courier'))\
 				.grid(row = i, column = 1, padx = 2, pady = 2, sticky='news')
+			Label(self.template_window, text = str(template.reverse_complement_template_id),
+				bg = 'white', font = font.Font(family='Courier'))\
+				.grid(row = i, column = 2, padx = 2, pady = 2, sticky='news')
 			i += 1
 
 	def update_progress(self, text):
@@ -278,12 +279,20 @@ class Alignment_Tab(Tab):
 
 		# Create templates or get them from database
 		for t in self.template_lines:
-			if str(t.var.get()) == '':
+			if str(t.template_var.get()) == '':
 				continue
 			try:
-				t.template = tp.Template(str(t.var.get()))
+				template_string = t.template_var.get()
+				reverse_complement_template_id = t.reverse_complement_template_id_var.get()
+				if reverse_complement_template_id == "":
+					reverse_complement_template_id = None
+				else:
+					reverse_complement_template_id = int(reverse_complement_template_id)
+
+				t.template = tp.Template(str(t.template_var.get()), reverse_complement_template_id = reverse_complement_template_id)
+
 			except:
-				t.template = db.get_template_by_sequence(str(t.var.get()))
+				t.template = db.get_template_by_sequence(str(t.template_var.get()))
 
 		for instance in self.method_instances:
 			if instance['is_enabled'].get() in [0,'0']:
@@ -630,9 +639,15 @@ class Alignment_Tab(Tab):
 					print('ValueError')
 
 	def set_is_complement(self, index):
-		pass
+
+		if self.fastq_file_complement_values[index].get() == 1:
+			self.fastq_files[index].is_reverse_complement = True
+		else:
+			self.fastq_files[index].is_reverse_complement = False
 
 	def append_files(self, items):
+
+		self.fastq_file_complement_values = []
 
 		for i, item in enumerate(items):
 
@@ -655,7 +670,15 @@ class Alignment_Tab(Tab):
 			lab.grid(column=0, row=i, sticky='news')
 			dropdown.grid(column=1, row=i, sticky='news')
 
-			is_complement_checkbutton = Checkbutton(self.file_wrapper, command=lambda index=i: self.set_is_complement(index))
+			fastq_file_complement_value = IntVar()
+			if self.fastq_files[i].is_reverse_complement:
+				fastq_file_complement_value.set(1)
+			else:
+				fastq_file_complement_value.set(0)
+
+			self.fastq_file_complement_values.append(fastq_file_complement_value)
+
+			is_complement_checkbutton = Checkbutton(self.file_wrapper, variable=fastq_file_complement_value, command=lambda index=i: self.set_is_complement(index))
 
 			is_complement_checkbutton.grid(column=2, row=i, sticky='news')
 
