@@ -289,7 +289,10 @@ class Alignment_Tab(Tab):
 				else:
 					reverse_complement_template_id = int(reverse_complement_template_id)
 
-				t.template = tp.Template(str(t.template_var.get()), reverse_complement_template_id = reverse_complement_template_id)
+				template_string = str(t.template_var.get().upper())
+				t.template_var.set(template_string)
+
+				t.template = tp.Template(template_string, reverse_complement_template_id = reverse_complement_template_id)
 
 			except:
 				t.template = db.get_template_by_sequence(str(t.template_var.get()))
