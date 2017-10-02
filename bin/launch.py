@@ -71,6 +71,11 @@ class Application(Frame):
 
 root = Tk()
 
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+root.geometry("%sx%s" % (screen_width, screen_height))
+
 root.wm_title('CLOVERbot')
 
 root.update()
