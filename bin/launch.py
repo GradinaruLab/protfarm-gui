@@ -8,6 +8,7 @@ import os
 from analysis import heat
 from gui import methods
 from gui import globals
+from gui.Template_Tab import *
 from gui.Alignment_Tab import *
 from gui.Analysis_Tab import *
 from gui.Alignment_Statistics_Tab import *
@@ -43,10 +44,12 @@ class Application(Frame):
         self.listFont = font.Font(size=12)
 
         self.notebook = ttk.Notebook(master)
+        self.template_tab = Template_Tab(self.notebook)
         self.alignment_tab = Alignment_Tab(self.notebook)
         self.stats_tab = Alignment_Statistics_Tab(self.notebook)
         self.analysis_tab = Analysis_Tab(self.notebook)
 
+        self.notebook.add(self.template_tab, text='Templates', padding=20)
         self.notebook.add(self.alignment_tab, text='Alignment', padding=20)
         self.notebook.add(
             self.stats_tab, text='Alignment Statistics', padding=20)

@@ -24,8 +24,7 @@ class Alignment_Tab(Tab):
 		"""
 		Initalizes an alignment tab
 		"""
-		if not globals.next_template_seed:
-			globals.next_template_seed = 0
+
 		Tab.__init__(self, master, **kwargs)
 		self._progress_text = ""
 
@@ -42,23 +41,6 @@ class Alignment_Tab(Tab):
 			relwidth=1.0, relheight=0.40, relx=0.0, rely=0.0)
 		self.third_left_frame.place(
 			relwidth=1.0, relheight=0.60, relx=0.0, rely=0.40)
-
-		# Templates
-		self.template_lines = []
-
-		Label(self.first_left_frame, text='New Template(s)').pack(
-			side='top', pady=10)
-
-		self.add_template()
-
-		frame = Frame(self.first_left_frame)
-		add_template_btn = Button(frame, text='Add template',
-								  command=lambda: self.add_template())
-		view_templates_btn = Button(frame, text='View Existing Templates',
-			command = self.show_old_templates)
-		view_templates_btn.pack(side=RIGHT)
-		add_template_btn.pack(side=RIGHT, pady=10)
-		frame.pack(side=BOTTOM, pady=5)
 
 		# FASTQ files
 		Label(self.second_left_frame, text='Add files for alignment')\
@@ -166,66 +148,6 @@ class Alignment_Tab(Tab):
 		# Add existing libraries
 		self.add_existing_libraries()
 
-	def add_template(self):
-
-		template_var = StringVar()
-		reverse_complement_template_id_var = StringVar()
-
-		new_template_label_frame = Frame(self.first_left_frame, pady=4, bd=1, relief=SUNKEN)
-		Label(new_template_label_frame, text='Template ID: ' +
-			  str(globals.next_template_seed), bg='white').pack(side=LEFT)
-		Label(new_template_label_frame, text='Reverse Complement ID:', bg='white').pack(side=RIGHT)
-		new_template_label_frame.pack(fill=BOTH, pady=0)
-
-		new_template_entry_frame = Frame(self.first_left_frame, pady=4, relief=SUNKEN)
-		reverse_complement_template_id_entry = Entry(new_template_entry_frame, textvariable = reverse_complement_template_id_var,
-			font = font.Font(family="Courier", size=11), width=5)
-		reverse_complement_template_id_entry.pack(side=RIGHT)
-		template_entry = Entry(new_template_entry_frame, textvariable = template_var,
-			font = font.Font(family="Courier", size=11), width=100)
-		template_entry.pack(side=RIGHT, fill=BOTH)
-		new_template_entry_frame.pack(fill=BOTH, pady=0)
-
-
-		new_template_entry_frame.id = globals.next_template_seed
-		new_template_entry_frame.template_var = template_var
-		new_template_entry_frame.reverse_complement_template_id_var = reverse_complement_template_id_var
-
-		globals.next_template_seed += 1
-
-		self.template_lines.append(new_template_entry_frame)
-
-	def show_old_templates(self):
-		"""
-		Displays a window with old templates to be viewed
-		"""
-		if hasattr(self, 'template_window'):
-			self.template_window.destroy()
-		self.template_window = Toplevel(padx = 10, pady = 10)
-		self.template_window.title('Templates')
-		n = len(db.get_templates())
-		Label(self.template_window, text = str('ID'), bg = 'white',
-			font=font.Font(size=14, weight='bold'))\
-			.grid(row = 0, column = 0, padx = 2, pady = 2, sticky = 'news')
-		Label(self.template_window, text = str('Sequence'),
-			font = font.Font(size=14, weight='bold'), bg = 'white')\
-			.grid(row = 0, column = 1, padx = 2, pady = 2, sticky = 'news')
-		Label(self.template_window, text = str('Reverse Complement'),
-			font = font.Font(size=14, weight='bold'), bg = 'white')\
-			.grid(row = 0, column = 2, padx = 2, pady = 2, sticky = 'news')
-		i = 1
-		for template in db.get_templates():
-			Label(self.template_window, text = str(template.id), bg = 'white',
-				font = font.Font(family='Courier'))\
-				.grid(row = i, column = 0, padx = 2, pady = 2, sticky ='news')
-			Label(self.template_window, text = str(template.sequence),
-				bg = 'white', font = font.Font(family='Courier'))\
-				.grid(row = i, column = 1, padx = 2, pady = 2, sticky='news')
-			Label(self.template_window, text = str(template.reverse_complement_template_id),
-				bg = 'white', font = font.Font(family='Courier'))\
-				.grid(row = i, column = 2, padx = 2, pady = 2, sticky='news')
-			i += 1
-
 	def update_progress(self, text):
 
 		self._progress_text = text
@@ -251,8 +173,7 @@ class Alignment_Tab(Tab):
 			for id in ids:
 				try:
 					id = int(id)
-					if not (0 <= id <= globals.next_template_seed or id in \
-						[template.id for template in db.get_templates()]):
+					if id not in [template.id for template in db.get_templates()]:
 						errors.append('Template ID '+str(id)+' not found')
 				except:
 					errors.append('Illegal Template ID \'' + id +
@@ -273,29 +194,6 @@ class Alignment_Tab(Tab):
 			' not been assigned to a library.\n\n' + '\n'.join(errors) +
 			'\nAre you sure you want to continue?'):
 			return
-
-		# The next template id before we started adding any
-		previous_next_template_id = int(db.get_template_seed())
-
-		# Create templates or get them from database
-		for t in self.template_lines:
-			if str(t.template_var.get()) == '':
-				continue
-			try:
-				template_string = t.template_var.get()
-				reverse_complement_template_id = t.reverse_complement_template_id_var.get()
-				if reverse_complement_template_id == "":
-					reverse_complement_template_id = None
-				else:
-					reverse_complement_template_id = int(reverse_complement_template_id)
-
-				template_string = str(t.template_var.get().upper())
-				t.template_var.set(template_string)
-
-				t.template = tp.Template(template_string, reverse_complement_template_id = reverse_complement_template_id)
-
-			except:
-				t.template = db.get_template_by_sequence(str(t.template_var.get()))
 
 		for instance in self.method_instances:
 			if instance['is_enabled'].get() in [0,'0']:
@@ -323,16 +221,8 @@ class Alignment_Tab(Tab):
 				try:
 					id = info['template'].get()
 					print('id',id)
-					if int(id) >= previous_next_template_id:
-						for t in self.template_lines:
-							print('t.id:', t.id, ', id:',id, name)
-							if int(t.id) == int(id):
-								print(library.name, t.template.id)
-								library_templates[library.id] = t.template.id
-								break
-					else:
-						print(library.name, 'id:',id)
-						library_templates[library.id] = int(id)
+					print(library.name, 'id:',id)
+					library_templates[library.id] = int(id)
 				except:
 					pass
 
