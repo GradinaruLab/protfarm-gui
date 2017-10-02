@@ -79,6 +79,11 @@ else:
 
 if directory:
     ws.set_workspace_path(directory)
-    app = Application( master=root)
+    app = Application(master=root)
+
+    def on_closing():
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     app.mainloop()
-root.destroy()
