@@ -93,6 +93,7 @@ class Sample_Tab(Tab):
         self._sample_options.extend([sample.name for sample in self._samples])
 
         self._sample_dropdowns = []
+        self._is_complement_vars = []
 
         FASTQ_file_header = Label(self._FASTQ_scroll_area, text="FASTQ File", \
                 bg="white", relief="solid", bd="1")
@@ -101,6 +102,10 @@ class Sample_Tab(Tab):
         sample_header = Label(self._FASTQ_scroll_area, text="Sample", \
                 bg="white", relief="solid", bd="1")
         sample_header.grid(row = 0, column = 1, sticky = "news")
+
+        reverse_complement_header = Label(self._FASTQ_scroll_area, \
+            text="Is Reverse Complement", bg="white", relief="solid", bd="1")
+        reverse_complement_header.grid(row = 0, column = 2, sticky = "news")
 
         for FASTQ_file_index, FASTQ_file in enumerate(self._FASTQ_files):
 
@@ -140,7 +145,24 @@ class Sample_Tab(Tab):
 
             self._sample_dropdowns.append(sample_dropdown)
 
-        Grid.columnconfigure(self._FASTQ_scroll_area, 0, weight=1)
+            is_complement_var = IntVar()
+            if FASTQ_file.is_reverse_complement:
+                is_complement_var.set(1)
+            else:
+                is_complement_var.set(0)
+
+            complement_checkbox_command = partial(self.complement_selected, \
+                FASTQ_file_index)
+
+            is_complement_checkbox = Checkbutton(self._FASTQ_scroll_area, \
+                variable = is_complement_var, bg="white", relief="solid", \
+                bd="1", command=complement_checkbox_command)
+            is_complement_checkbox.grid(row = FASTQ_file_index + 1, \
+                column = 2, sticky="news")
+            is_complement_checkbox.bind("<Button-4>", self.scroll)
+            is_complement_checkbox.bind("<Button-5>", self.scroll)
+
+            self._is_complement_vars.append(is_complement_var)
 
     def sample_selected(self, FASTQ_file_index, selected_value):
 
@@ -159,6 +181,12 @@ class Sample_Tab(Tab):
 
         new_sample = db.get_library(selected_value)
         new_sample.add_file(FASTQ_file.name)
+
+    def complement_selected(self, index):
+
+        FASTQ_file = self._FASTQ_files[index]
+        is_reverse_complement = self._is_complement_vars[index].get() == 1
+        FASTQ_file.is_reverse_complement = is_reverse_complement
 
     def add_sample_clicked(self):
         self.add_edit_sample()
