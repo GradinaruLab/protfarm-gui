@@ -21,10 +21,8 @@ class Template_Tab(Tab):
             command=self.add_template_clicked)
         self._add_template_button.pack(side=TOP)
 
-        self.load_templates()
-
     def reload(self):
-        pass
+        self.load_templates()
 
     def load_templates(self):
 

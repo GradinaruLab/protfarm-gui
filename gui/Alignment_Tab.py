@@ -49,14 +49,6 @@ class Alignment_Tab(Tab):
 		reset_lib_temp_btn["command"] = self.reset_libraries
 		reset_lib_temp_btn.pack(side = BOTTOM, anchor = 'e', pady=5, padx=5)
 
-		frame = Frame(self.second_left_frame)
-		new_lib = StringVar()
-		self.add_library_entry = Entry(frame, textvariable=new_lib)
-		add_lib_btn = Button(frame, text='Add Library')
-		self.add_library_entry.pack(side=LEFT, fill=BOTH)
-		add_lib_btn.pack(side=LEFT, fill=BOTH)
-		frame.pack(pady=5, side=TOP)
-
 		# Make a scrollable area
 		self.file_wrapper = self.scroll_area(self.second_left_frame)
 
@@ -74,11 +66,6 @@ class Alignment_Tab(Tab):
 		self.library_frame = self.scroll_area(self.third_left_frame,
 			height = height)
 		self.add_existing_libraries()
-
-		self.add_library_entry.bind("<Return>", lambda: self.add_library(
-			new_lib))
-
-		add_lib_btn["command"]=lambda: self.add_library(new_lib)
 
 		self.first_left_frame.grid(column=0, row=0, sticky='news')
 		self.layer.grid(column=0, row=1, sticky='news')

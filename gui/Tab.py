@@ -77,6 +77,9 @@ class Tab(Frame):
 		start = (0.0 + sibling.winfo_y()) / master.winfo_height() + ratio
 		widget.place(relheight=height - ratio, rely=start)
 
+	def reload(self):
+		pass
+		
 	def scroll(self, event):
 		widget = event.widget
 		num = event.num
@@ -113,6 +116,7 @@ class Tab(Frame):
 				continue
 			else:
 				break
+
 	def scroll_area(self, parent_frame, scroll_y = True, scroll_x = False,
 		height = 200):
 		scroll_frame = Frame(parent_frame, relief = GROOVE, bd = 2)
