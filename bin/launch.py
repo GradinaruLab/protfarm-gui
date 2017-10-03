@@ -9,6 +9,7 @@ from analysis import heat
 from gui import methods
 from gui import globals
 from gui.Template_Tab import *
+from gui.Sample_Tab import *
 from gui.Alignment_Tab import *
 from gui.Analysis_Tab import *
 from gui.Alignment_Statistics_Tab import *
@@ -23,7 +24,7 @@ class Application(Frame):
 
     def __init__(self, master=None):
         
-        Frame.__init__(self, master, height=160)
+        Frame.__init__(self, master)
         
         databases = {
             'template_db' : db.template_db,
@@ -45,11 +46,13 @@ class Application(Frame):
 
         self.notebook = ttk.Notebook(master)
         self.template_tab = Template_Tab(self.notebook)
+        self.sample_tab = Sample_Tab(self.notebook)
         self.alignment_tab = Alignment_Tab(self.notebook)
         self.stats_tab = Alignment_Statistics_Tab(self.notebook)
         self.analysis_tab = Analysis_Tab(self.notebook)
 
         self.notebook.add(self.template_tab, text='Templates', padding=20)
+        self.notebook.add(self.sample_tab, text="Samples", padding=20)
         self.notebook.add(self.alignment_tab, text='Alignment', padding=20)
         self.notebook.add(
             self.stats_tab, text='Alignment Statistics', padding=20)
@@ -59,6 +62,7 @@ class Application(Frame):
 
         self.notebook.bind("<1>", self.tab_handler)
         self.pack(fill='both')
+        self.template_tab.reload()
 
     def tab_handler(self, event):
         if event.widget.identify(event.x, event.y) in ['label', 'padding']:
@@ -78,8 +82,6 @@ root.geometry("%sx%s" % (screen_width, screen_height))
 
 root.wm_title('CLOVERbot')
 
-root.update()
-
 if len(sys.argv) > 1:
     directory = sys.argv[1]
 else:
@@ -88,6 +90,8 @@ else:
 if directory:
     ws.set_workspace_path(directory)
     app = Application(master=root)
+
+    root.update()
 
     def on_closing():
         if messagebox.askokcancel("Quit", "Do you want to quit?"):

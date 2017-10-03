@@ -2,6 +2,7 @@ from .Tab import *
 from tkinter import messagebox
 from workspace import Database as db
 from workspace.Library import Library
+from functools import partial
 
 class Sample_Tab(Tab):
 
@@ -10,18 +11,18 @@ class Sample_Tab(Tab):
         Tab.__init__(self, master, **kwargs)
 
         self._samples_frame = Frame(self)
-        self._samples_frame.pack(side=LEFT)
+        self._samples_frame.place(relwidth=0.5, relheight=1.0, relx=0.0, rely=0.0)
 
         self._existing_samples_frame = Frame(self._samples_frame)
-        self._existing_samples_frame.pack()
+        self._existing_samples_frame.pack(side=TOP)
 
         self._add_sample_button = Button(self._samples_frame, \
             text="Add Sample", command=self.add_sample_clicked)
 
-        self._add_sample_button.pack()
+        self._add_sample_button.pack(side=TOP)
 
         self._FASTQ_frame = Frame(self)
-        self._FASTQ_frame.pack()
+        self._FASTQ_frame.place(relwidth=0.5, relheight=1.0, relx=0.5, rely=0.0)
 
         self._samples = []
         self._sample_list_frame = None
@@ -48,20 +49,28 @@ class Sample_Tab(Tab):
 
         sample_index = 0
 
+        self._sample_labels = []
+        self._sample_rename_buttons = []
+        self._sample_delete_buttons = []
+
         for sample in self._samples:
 
-            Label(self._sample_list_frame, text=sample.name)\
-                .grid(row = sample_index, column = 0)
+            label = Label(self._sample_list_frame, text=sample.name)
+            label.grid(row = sample_index, column = 0)
 
-            Button(self._sample_list_frame, text="Rename", \
+            rename_button = Button(self._sample_list_frame, text="Rename", \
                 command=lambda index=sample_index: \
-                self.rename_sample_clicked(index))\
-                .grid(row = sample_index, column=1, sticky="news")
+                self.rename_sample_clicked(index))
+            rename_button.grid(row = sample_index, column=1, sticky="news")
 
-            Button(self._sample_list_frame, text="Delete", \
+            delete_button = Button(self._sample_list_frame, text="Delete", \
                 command=lambda index=sample_index: \
-                self.delete_sample_clicked(index))\
-                .grid(row = sample_index, column=2, sticky="news")
+                self.delete_sample_clicked(index))
+            delete_button.grid(row = sample_index, column=2, sticky="news")
+
+            self._sample_labels.append(label)
+            self._sample_rename_buttons.append(rename_button)
+            self._sample_delete_buttons.append(delete_button)
 
             sample_index += 1
 
@@ -73,21 +82,71 @@ class Sample_Tab(Tab):
             self._FASTQ_list_frame.destroy()
 
         self._FASTQ_list_frame = Frame(self._FASTQ_frame)
-        self._FASTQ_list_frame.pack()
+        self._FASTQ_list_frame.pack(fill=BOTH)
 
         self._FASTQ_scroll_area = self.scroll_area(self._FASTQ_list_frame, \
             height=self.winfo_toplevel().winfo_height())
 
         FASTQ_file_index = 0
 
+        self._sample_options = ["(None)"]
+        self._sample_options.extend([sample.name for sample in self._samples])
+
+        self._sample_dropdowns = []
+
         for FASTQ_file in self._FASTQ_files:
 
-            Label(self._FASTQ_scroll_area, text=FASTQ_file.name)\
-                .grid(row = FASTQ_file_index, column = 0)
+            label = Label(self._FASTQ_scroll_area, text=FASTQ_file.name, \
+                bg="white")
+            label.grid(row = FASTQ_file_index, column = 0, sticky="news")
+
+            label.bind("<Button-4>", self.scroll)
+            label.bind("<Button-5>", self.scroll)
+
+            associated_sample_var = StringVar()
+
+            associated_sample = db.get_associated_library(FASTQ_file.name)
+
+            if associated_sample == None:
+                associated_sample_var.set(self._sample_options[0])
+            else:
+                associated_sample_var.set(associated_sample.name)
+
+            sample_selected_command = partial(self.sample_selected, \
+                FASTQ_file_index)
+
+            sample_dropdown = OptionMenu(self._FASTQ_scroll_area, \
+                associated_sample_var, *self._sample_options,\
+                command=sample_selected_command)
+            sample_dropdown.grid(row = FASTQ_file_index, column = 1, \
+                sticky="news")
+
+            sample_dropdown.bind("<Button-4>", self.scroll)
+            sample_dropdown.bind("<Button-5>", self.scroll)
+
+            self._sample_dropdowns.append(sample_dropdown)
             
             FASTQ_file_index += 1
 
         Grid.columnconfigure(self._FASTQ_scroll_area, 0, weight=1)
+
+    def sample_selected(self, FASTQ_file_index, selected_value):
+
+        FASTQ_file = self._FASTQ_files[FASTQ_file_index]
+
+        current_sample = db.get_associated_library(FASTQ_file.name)
+
+        if current_sample != None:
+            if current_sample.name == selected_value:
+                return
+            else:
+                current_sample.remove_file(FASTQ_file.name)
+
+        if selected_value == self._sample_options[0]:
+            return
+
+        new_sample = db.get_library(selected_value)
+        new_sample.add_file(FASTQ_file.name)
 
     def add_sample_clicked(self):
         self.add_edit_sample()
@@ -98,7 +157,7 @@ class Sample_Tab(Tab):
             self._new_sample_frame.destroy()
 
         self._new_sample_frame = Frame(self._samples_frame)
-        self._new_sample_frame.pack()
+        self._new_sample_frame.pack(side=TOP)
 
         self._editing_sample = sample
 
@@ -155,6 +214,13 @@ class Sample_Tab(Tab):
         self.add_edit_sample(self._samples[sample_index])
 
     def delete_sample_clicked(self, sample_index):
+
         db.delete_sample(self._samples[sample_index])
 
-        self.reload()
+        for dropdown in self._sample_dropdowns:
+            dropdown["menu"].delete(sample_index + 1)
+
+        self._sample_labels[sample_index].destroy()
+        self._sample_rename_buttons[sample_index].destroy()
+        self._sample_delete_buttons[sample_index].destroy()
+        del self._sample_labels[sample_index]

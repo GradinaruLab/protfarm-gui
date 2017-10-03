@@ -6,7 +6,6 @@ import sys
 import glob
 import os
 import threading
-from analysis import heat
 from . import methods
 from . import globals
 import re
@@ -21,36 +20,39 @@ from .Tab import *
 class Alignment_Tab(Tab):
 
 	def __init__(self, master, **kwargs):
-		"""
-		Initalizes an alignment tab
-		"""
 
 		Tab.__init__(self, master, **kwargs)
+
+		self.left_frame = Frame(self)
+		self.right_frame = Frame(self, bd=2, relief=GROOVE)
+
+		# Place left and right frame
+		ratio = 0.5
+		self.left_frame.place(relwidth=ratio, relheight=1.0, relx=0.0,
+							  rely=0.0)
+		self.right_frame.place(relwidth=1 - ratio, relheight=1.0,
+							   relx=ratio, rely=0.0)
+
+		self.layer = None
+		self.third_left_frame = None
+
+	def reload(self):
+
 		self._progress_text = ""
 
 		# Set up frames
 
-		self.left_frame = Frame(self)
-		self.right_frame = Frame(self, bd=2, relief=GROOVE)
-		self.first_left_frame = Frame(self.left_frame, bd=2, relief=GROOVE)
+		if self.layer != None:
+			self.layer.destroy()
+
+		if self.third_left_frame != None:
+			self.third_left_frame.destroy()
+
 		self.layer = Frame(self.left_frame, bd=0, relief=GROOVE)
-		self.second_left_frame = Frame(self.layer, bd=2, relief=GROOVE)
 		self.third_left_frame = Frame(self.layer, bd=2, relief=GROOVE)
 
-		self.second_left_frame.place(
-			relwidth=1.0, relheight=0.40, relx=0.0, rely=0.0)
 		self.third_left_frame.place(
-			relwidth=1.0, relheight=0.60, relx=0.0, rely=0.40)
-
-		# FASTQ files
-		Label(self.second_left_frame, text='Add files for alignment')\
-			.pack(side=TOP)
-		reset_lib_temp_btn = Button(self.second_left_frame, text = 'Reset')
-		reset_lib_temp_btn["command"] = self.reset_libraries
-		reset_lib_temp_btn.pack(side = BOTTOM, anchor = 'e', pady=5, padx=5)
-
-		# Make a scrollable area
-		self.file_wrapper = self.scroll_area(self.second_left_frame)
+			relwidth=1.0, relheight=1.0, relx=0.0, rely=0.0)
 
 		# View libraries
 
@@ -62,12 +64,10 @@ class Alignment_Tab(Tab):
 		display_frame.pack(side=TOP, pady=15)
 		Label(display_frame, text='Existing Libraries').pack(side=TOP)
 
-		height = int(self.winfo_screenheight()*0.4)
 		self.library_frame = self.scroll_area(self.third_left_frame,
-			height = height)
+			height = self.winfo_toplevel().winfo_height())
 		self.add_existing_libraries()
 
-		self.first_left_frame.grid(column=0, row=0, sticky='news')
 		self.layer.grid(column=0, row=1, sticky='news')
 
 		Grid.columnconfigure(self.left_frame, 0, weight=1)
@@ -115,25 +115,6 @@ class Alignment_Tab(Tab):
 		self.progress_label.pack(side=BOTTOM, anchor='e', padx=5, pady=5)
 
 		self.params_frame.pack(side=TOP, ipadx=5, ipady=5)
-
-		# Place left and right frame
-		ratio = 0.5
-		self.left_frame.place(relwidth=ratio, relheight=1.0, relx=0.0,
-							  rely=0.0)
-		self.right_frame.place(relwidth=1 - ratio, relheight=1.0,
-							   relx=ratio, rely=0.0)
-	def reset_libraries(self):
-		if not messagebox.askokcancel("WARNING", "Are you sure you want to reset" +
-			" libraries? All unsaved library changes will be lost."):
-			return
-
-		# Remove all libraries. This sets all fastq's to ('Select')
-		for i, frame in enumerate(self.library_frame.winfo_children()):
-			library = frame.library
-			self.remove_frame(frame, library, force_delete = True)
-
-		# Add existing libraries
-		self.add_existing_libraries()
 
 	def update_progress(self, text):
 
@@ -242,20 +223,9 @@ class Alignment_Tab(Tab):
 
 		self.fastq_files = db.get_FASTQ_files()[:]
 
-		self.append_files(self.fastq_files)
-
 		for library in db.get_libraries():
 			name = str(library.name)
-			fastq_files = library.fastq_files[:]
 			self.add_library(name)
-			for file in fastq_files:
-
-				for FASTQ_file_index, FASTQ_file in enumerate(self.fastq_files):
-					if FASTQ_file.name == file:
-						index = FASTQ_file_index
-						break
-
-				self.selected_index_changed(index, name)
 
 
 	def add_library(self, lib_var, fastq_files = []):
@@ -338,53 +308,6 @@ class Alignment_Tab(Tab):
 					break
 			self.library_selection_menus[index].selected_lib.set('')
 		self.libraries.remove(library)
-
-	def selected_index_changed(self, index, new_lib):
-		"""
-		Handles when a file is being assigned to a library
-		index: The index of the file being assigned a library
-		new_lib: The name of target library
-		"""
-
-		file = self.fastq_files[index]
-		old_lib = self.library_selection_menus[index].selected_lib.get()
-		self.library_selection_menus[index].selected_lib.set(new_lib)
-
-		if old_lib == new_lib:
-			return
-
-		try:
-			if old_lib in self.db_libraries\
-				and old_lib == db.get_associated_library(file.name).name:
-				if not messagebox.askokcancel("Warning",
-					'Are you sure you want to change'
-				+ ' the library for '+file.name+'? All aligment data for the'
-				+ ' subsequent' + ' libraries will be deleted?'):
-					self.library_selection_menus[index].selected_lib\
-					.set(old_lib)
-					return
-		except:
-			pass
-
-		if new_lib not in ['(Select)', '']:
-			self.library_dictionary[new_lib]['files'].append(file.name)
-			library_box = self.library_frame.winfo_children()\
-			[self.libraries.index(new_lib) - 1]
-			label = Label(library_box, text=file.name)
-			label.bind("<Button-4>",self.scroll)
-			label.bind("<Button-5>",self.scroll)
-			label.pack(side=TOP, fill=BOTH, anchor='w')
-		try:
-			old_index = self.library_dictionary[old_lib]['files'].index(file.name)
-			self.library_dictionary[old_lib]['files'].remove(file.name)
-			library_box = self.library_frame.winfo_children(
-			)[self.libraries.index(old_lib) - 1]
-			library_box.winfo_children()[old_index + 1].destroy()
-		except KeyError:
-			pass
-		except ValueError:
-			pass
-
 
 	def add_method(self, method):
 		"""Adds a box for the selected method"""
@@ -474,97 +397,9 @@ class Alignment_Tab(Tab):
 					widget['state'] = DISABLED
 				except:pass
 
-	def init_dropdown(self, some_var, item):
-		"""
-		Handles when '(Select)' is selected in any of library_selection_menus
-		some_var: Name of selected value (e.g. '(Select)')
-		item: Name of file being assigned to no library
-		"""
-
-		for FASTQ_file_index, FASTQ_file in enumerate(self.fastq_files):
-			if FASTQ_file.name == item:
-				index = FASTQ_file_index
-				break
-		old_lib = self.library_selection_menus[index].selected_lib.get()
-		try:
-			name = db.get_associated_library(item).name
-		except:
-			name = old_lib
-		if name in self.db_libraries \
-			and name == db.get_associated_library(item).name \
-			and not messagebox.askokcancel("Warning",
-						'Are you sure you want to change the library for ' + \
-						item + '? All aligment data for the subsequent'
-						+ ' library will be deleted when you run alignment'):
-			self.library_selection_menus[index].selected_lib.set(name)
-			return
-		for name, lib in self.library_dictionary.items():
-			files = lib['files']
-			if str(item) in files or unicode(item):
-				if name == old_lib == some_var:
-					continue
-				old_lib = name
-
-				try:
-					old_index = self.library_dictionary[
-						old_lib]['files'].index(item)
-					self.library_dictionary[old_lib]['files'].remove(item)
-					
-					library_box = self.library_frame.winfo_children(
-					)[self.libraries.index(old_lib) - 1]
-					library_box.winfo_children()[1 + old_index].destroy()
-				except KeyError:
-					print('KeyError')
-				except ValueError:
-					print('ValueError')
-
 	def set_is_complement(self, index):
 
 		if self.fastq_file_complement_values[index].get() == 1:
 			self.fastq_files[index].is_reverse_complement = True
 		else:
 			self.fastq_files[index].is_reverse_complement = False
-
-	def append_files(self, items):
-
-		self.fastq_file_complement_values = []
-
-		for i, item in enumerate(items):
-
-			selected_lib = StringVar()
-			selected_lib.set(self.libraries[0])
-			dropdown = OptionMenu(self.file_wrapper, selected_lib,
-								  *self.libraries,
-								  command=lambda index=i, item=item.name: \
-								  self.init_dropdown(index, item.name))
-			dropdown.selected_lib = selected_lib
-			dropdown.configure(relief=RAISED)
-			self.library_selection_menus.append(dropdown)
-
-			lab = Label(self.file_wrapper, bg='white', text=item.name,
-						padx=10, pady=10)
-			lab.bind("<Button-4>", lambda e: self.scroll(e))
-			lab.bind("<Button-5>", lambda e: self.scroll(e))
-			dropdown.bind("<Button-4>", lambda e: self.scroll(e))
-			dropdown.bind("<Button-5>", lambda e: self.scroll(e))
-			lab.grid(column=0, row=i, sticky='news')
-			dropdown.grid(column=1, row=i, sticky='news')
-
-			fastq_file_complement_value = IntVar()
-			if self.fastq_files[i].is_reverse_complement:
-				fastq_file_complement_value.set(1)
-			else:
-				fastq_file_complement_value.set(0)
-
-			self.fastq_file_complement_values.append(fastq_file_complement_value)
-
-			is_complement_checkbutton = Checkbutton(self.file_wrapper, variable=fastq_file_complement_value, command=lambda index=i: self.set_is_complement(index))
-
-			is_complement_checkbutton.grid(column=2, row=i, sticky='news')
-
-			Grid.columnconfigure(self.file_wrapper, 0, weight=1)
-			Grid.columnconfigure(self.file_wrapper, 1, weight=1)
-
-	def reload(self):
-		pass
-
