@@ -94,11 +94,19 @@ class Sample_Tab(Tab):
 
         self._sample_dropdowns = []
 
-        for FASTQ_file in self._FASTQ_files:
+        FASTQ_file_header = Label(self._FASTQ_scroll_area, text="FASTQ File", \
+                bg="white", relief="solid", bd="1")
+        FASTQ_file_header.grid(row = 0, column = 0, sticky = "news")
+
+        sample_header = Label(self._FASTQ_scroll_area, text="Sample", \
+                bg="white", relief="solid", bd="1")
+        sample_header.grid(row = 0, column = 1, sticky = "news")
+
+        for FASTQ_file_index, FASTQ_file in enumerate(self._FASTQ_files):
 
             label = Label(self._FASTQ_scroll_area, text=FASTQ_file.name, \
-                bg="white")
-            label.grid(row = FASTQ_file_index, column = 0, sticky="news")
+                bg="white", relief="solid", bd="1")
+            label.grid(row = FASTQ_file_index + 1, column = 0, sticky="news")
 
             label.bind("<Button-4>", self.scroll)
             label.bind("<Button-5>", self.scroll)
@@ -115,18 +123,22 @@ class Sample_Tab(Tab):
             sample_selected_command = partial(self.sample_selected, \
                 FASTQ_file_index)
 
-            sample_dropdown = OptionMenu(self._FASTQ_scroll_area, \
-                associated_sample_var, *self._sample_options,\
-                command=sample_selected_command)
-            sample_dropdown.grid(row = FASTQ_file_index, column = 1, \
+            dropdown_frame = Frame(self._FASTQ_scroll_area, bg="white", \
+                relief="solid", bd="1")
+            dropdown_frame.grid(row = FASTQ_file_index + 1, column = 1, \
                 sticky="news")
+            dropdown_frame.bind("<Button-4>", self.scroll)
+            dropdown_frame.bind("<Button-5>", self.scroll)
+
+            sample_dropdown = OptionMenu(dropdown_frame, \
+                associated_sample_var, command=sample_selected_command, \
+                *self._sample_options)
+            sample_dropdown.pack()
 
             sample_dropdown.bind("<Button-4>", self.scroll)
             sample_dropdown.bind("<Button-5>", self.scroll)
 
             self._sample_dropdowns.append(sample_dropdown)
-            
-            FASTQ_file_index += 1
 
         Grid.columnconfigure(self._FASTQ_scroll_area, 0, weight=1)
 

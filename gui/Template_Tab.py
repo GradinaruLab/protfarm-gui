@@ -43,9 +43,11 @@ class Template_Tab(Tab):
 
         i = 1
         for template in self._templates:
-            Label(self._existing_templates_table, text=template.name, bd=1, relief="solid")\
+            Label(self._existing_templates_table, text=template.name, bd=1, \
+                relief="solid")\
                 .grid(row = i, column=0, sticky="news")
-            Label(self._existing_templates_table, text=template.sequence, bd=1, relief="solid")\
+            Label(self._existing_templates_table, text=template.sequence, bd=1,\
+                relief="solid")\
                 .grid(row = i, column=1, sticky="news")
 
             if template.reverse_complement_template_id != None:

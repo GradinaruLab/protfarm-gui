@@ -63,11 +63,19 @@ class Alignment_Tab(Tab):
 		self._template_options.extend(\
 			[template.name for template in self._templates])
 
+		sample_header = Label(self._samples_scroll_area, text="Sample", \
+				bg="white", relief="solid", bd="1")
+		sample_header.grid(row = 0, column = 0, sticky = "news")
+
+		template_header = Label(self._samples_scroll_area, text="Template", \
+				bg="white", relief="solid", bd="1")
+		template_header.grid(row = 0, column = 1, sticky = "news")
+
 		for sample_index, sample in enumerate(self._samples):
 
 			label = Label(self._samples_scroll_area, text=sample.name, \
-				bg="white")
-			label.grid(row = sample_index, column = 0)
+				bg="white", relief="solid", bd=1)
+			label.grid(row = sample_index + 1, column = 0, sticky="news")
 			label.bind("<Button-4>", self.scroll)
 			label.bind("<Button-5>", self.scroll)
 
@@ -77,11 +85,17 @@ class Alignment_Tab(Tab):
 			template_selected_command = partial(self.template_selected, \
 				sample_index)
 
-			template_dropdown = OptionMenu(self._samples_scroll_area, \
+			dropdown_frame = Frame(self._samples_scroll_area, bg="white", \
+				relief="solid", bd=1)
+			dropdown_frame.grid(row = sample_index + 1, column = 1, \
+				sticky = "news")
+			dropdown_frame.bind("<Button-4>", self.scroll)
+			dropdown_frame.bind("<Button-5>", self.scroll)
+
+			template_dropdown = OptionMenu(dropdown_frame, \
 				associated_template_var, *self._template_options, \
 				command=template_selected_command)
-			template_dropdown.grid(row = sample_index, column = 1, \
-				sticky="news")
+			template_dropdown.pack()
 
 			template_dropdown.bind("<Button-4>", self.scroll)
 			template_dropdown.bind("<Button-5>", self.scroll)
