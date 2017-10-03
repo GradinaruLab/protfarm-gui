@@ -16,6 +16,7 @@ from workspace import Template as tp
 from workspace import Alignment as al
 from workspace import Database as db
 from .Tab import *
+from functools import partial
 
 class Alignment_Tab(Tab):
 
@@ -23,76 +24,109 @@ class Alignment_Tab(Tab):
 
 		Tab.__init__(self, master, **kwargs)
 
-		self.left_frame = Frame(self)
-		self.right_frame = Frame(self, bd=2, relief=GROOVE)
+		self._left_frame = Frame(self)
+		self._right_frame = Frame(self)
 
-		# Place left and right frame
-		ratio = 0.5
-		self.left_frame.place(relwidth=ratio, relheight=1.0, relx=0.0,
+		self._left_frame.place(relwidth=0.5, relheight=1.0, relx=0.0,
 							  rely=0.0)
-		self.right_frame.place(relwidth=1 - ratio, relheight=1.0,
-							   relx=ratio, rely=0.0)
+		self._right_frame.place(relwidth=0.5, relheight=1.0,
+							   relx=0.5, rely=0.0)
 
-		self.layer = None
-		self.third_left_frame = None
+		self._samples_frame = None
+		self._alignment_frame = None
 
 	def reload(self):
 
 		self._progress_text = ""
+		self._sample_templates = {}
 
-		# Set up frames
+		self.load_samples()
+		self.load_alignment()
 
-		if self.layer != None:
-			self.layer.destroy()
+	def load_samples(self):
 
-		if self.third_left_frame != None:
-			self.third_left_frame.destroy()
+		if self._samples_frame != None:
+			self._samples_frame.destroy()
 
-		self.layer = Frame(self.left_frame, bd=0, relief=GROOVE)
-		self.third_left_frame = Frame(self.layer, bd=2, relief=GROOVE)
+		self._samples_frame = Frame(self._left_frame)
+		self._samples_frame.pack()
 
-		self.third_left_frame.place(
-			relwidth=1.0, relheight=1.0, relx=0.0, rely=0.0)
+		Label(self._samples_frame, text='Existing Samples')\
+			.pack(side=TOP)
 
-		# View libraries
-
-		# Resize bar:
-		self.resize_bar(self.third_left_frame, orient ='x')
-
-		# Display frame
-		display_frame = Frame(self.third_left_frame)
-		display_frame.pack(side=TOP, pady=15)
-		Label(display_frame, text='Existing Libraries').pack(side=TOP)
-
-		self.library_frame = self.scroll_area(self.third_left_frame,
+		self._samples_scroll_area = self.scroll_area(self._samples_frame,
 			height = self.winfo_toplevel().winfo_height())
-		self.add_existing_libraries()
 
-		self.layer.grid(column=0, row=1, sticky='news')
+		self._samples = db.get_samples()
+		self._templates = db.get_templates()
+		self._template_options = ["(None)"]
+		self._template_options.extend(\
+			[template.name for template in self._templates])
 
-		Grid.columnconfigure(self.left_frame, 0, weight=1)
-		Grid.rowconfigure(self.left_frame, 1, weight=1)
+		for sample_index, sample in enumerate(self._samples):
 
-		# Right frame
+			label = Label(self._samples_scroll_area, text=sample.name, \
+				bg="white")
+			label.grid(row = sample_index, column = 0)
+			label.bind("<Button-4>", self.scroll)
+			label.bind("<Button-5>", self.scroll)
 
-		self.resize_bar(self.right_frame, orient='y')
+			associated_template_var = StringVar()
+			associated_template_var.set(self._template_options[0])
+
+			template_selected_command = partial(self.template_selected, \
+				sample_index)
+
+			template_dropdown = OptionMenu(self._samples_scroll_area, \
+				associated_template_var, *self._template_options, \
+				command=template_selected_command)
+			template_dropdown.grid(row = sample_index, column = 1, \
+				sticky="news")
+
+			template_dropdown.bind("<Button-4>", self.scroll)
+			template_dropdown.bind("<Button-5>", self.scroll)
+
+	def template_selected(self, sample_index, selected_value):
+
+		sample = self._samples[sample_index]
+
+		if selected_value == self._template_options[0]:
+			del self._library_templates[sample.id]
+		else:
+			selected_template_index = self._templates.index(selected_value)
+			selected_template = self._templates[selected_template_index]
+
+			self._library_templates[sample.id] = selected_template.id
+
+	def load_alignment(self):
+
+		if self._alignment_frame != None:
+			self._alignment_frame.destroy()
+
+		self._alignment_frame = Frame(self._right_frame)
+		#self._alignment_frame.pack(fill=BOTH)
+		self._alignment_frame.place(relwidth=1.0, relheight=1.0, relx=0.0,
+							  rely=0.0)
+
+		self._methods_frame = Frame(self._alignment_frame)
+		self._methods_frame.pack(fill=BOTH)
 
 		# Parameters and choice of alignment methods
 
-		par_label = Label(self.right_frame, text='Alignment methods')
+		par_label = Label(self._methods_frame, text='Alignment methods')
 		par_label.pack(side=TOP, fill=BOTH)
 
-		s = ttk.Separator(self.right_frame, orient=HORIZONTAL)
+		s = ttk.Separator(self._methods_frame, orient=HORIZONTAL)
 		s.pack(side=TOP, fill='x')
 
 		# Create a container frame for methods
 		self.method_instances = []
-		self.params_frame = Frame(self.right_frame, bg='white')
+		self.params_frame = Frame(self._methods_frame, bg='white')
 		self.method_parameters = []
 
 		self.number_of_columns = 2
 
-		frame = Frame(self.right_frame)
+		frame = Frame(self._methods_frame)
 		var = StringVar()
 		method_list = [name for name in sorted(methods.methods)]
 		var.set(method_list[0])
@@ -107,11 +141,11 @@ class Alignment_Tab(Tab):
 		self.add_method_button.pack(side=LEFT, pady=5, padx=5)
 		frame.pack(side=TOP)
 
-		self.go_button = Button(self.right_frame, text='Start Alignment',
+		self.go_button = Button(self._alignment_frame, text='Start Alignment',
 								command=self.start_alignment)
 		self.go_button.pack(side=BOTTOM, anchor='e', padx=5, pady=5)
 
-		self.progress_label = Label(self.right_frame)
+		self.progress_label = Label(self._alignment_frame)
 		self.progress_label.pack(side=BOTTOM, anchor='e', padx=5, pady=5)
 
 		self.params_frame.pack(side=TOP, ipadx=5, ipady=5)
@@ -133,34 +167,11 @@ class Alignment_Tab(Tab):
 
 		# Check if all libraries have been assigned to existing templates
 		errors = []
-		for name, lib in self.library_dictionary.items():
-			if name == '(Select)':
-				continue
-
-			ids = re.findall('\d+', str(lib['template'].get()))
-			for id in ids:
-				try:
-					id = int(id)
-					if id not in [template.id for template in db.get_templates()]:
-						errors.append('Template ID '+str(id)+' not found')
-				except:
-					errors.append('Illegal Template ID \'' + id +
-						'\' for library ' + name + '. ID should be an integer')
-			if len(ids) > 1:
-				errors.append('The alignment only allows exactly one template'+
-					' per library, ' + str(len(ids)) + ' given.')
+		for sample in self._samples:
+			if sample.id not in self._sample_templates:
+				errors.append("Missing template for sample '%s'" % sample.name)
 		if errors:
 			self.show_message(errors)
-			return
-
-		# Check if any fastq file have not been assigned to a library
-		del errors[:]
-		for i, dropdown in enumerate(self.library_selection_menus):
-			if dropdown.selected_lib.get() == '(Select)':
-				errors.append(self.fastq_files[i].name)
-		if errors and not messagebox.askokcancel('Warning', 'The following files have' +
-			' not been assigned to a library.\n\n' + '\n'.join(errors) +
-			'\nAre you sure you want to continue?'):
 			return
 
 		for instance in self.method_instances:
@@ -175,33 +186,11 @@ class Alignment_Tab(Tab):
 			except Error as e:
 				messagebox.showerror(str(e))
 				return
-			library_templates = {}
 
-			for name, info in self.library_dictionary.items():
-				print(name, info)
-				if name == '(Select)':
-					continue
-				try:
-					library = lb.Library(name)
-				except:
-					library = db.get_library(name)
-				library.fastq_files = info['files']
-				try:
-					id = info['template'].get()
-					print('id',id)
-					print(library.name, 'id:',id)
-					library_templates[library.id] = int(id)
-				except:
-					pass
-
-			alignment = al.Alignment(method, parameters, library_templates)
-			print(library_templates)
-			print(parameters)
+			alignment = al.Alignment(method, parameters, self._sample_templates)
 		for lib in self.library_dictionary:
 			globals.method_instances = self.method_instances
 			globals.library_dictionary = self.library_dictionary
-
-
 		try:
 			self.go_button["state"] = "disabled"
 			Threaded_Aligner(self).start()
@@ -210,104 +199,6 @@ class Alignment_Tab(Tab):
 			print(str(e))
 			messagebox.showinfo("Exception", str(e))
 			self.go_button["state"] = "normal"
-
-	def add_existing_libraries(self):
-		self.db_libraries = []
-		for library in db.get_libraries():
-			self.db_libraries.append(library.name)
-		self.library_selection_menus = []
-		self.library_dictionary = {}
-		self.libraries = ['(Select)']
-		self.library_dictionary['(Select)'] = {'files': [],
-			'template': StringVar()}
-
-		self.fastq_files = db.get_FASTQ_files()[:]
-
-		for library in db.get_libraries():
-			name = str(library.name)
-			self.add_library(name)
-
-
-	def add_library(self, lib_var, fastq_files = []):
-		if '' in self.libraries:
-			self.libraries.remove('')
-		lib_name = None
-		if type(lib_var).__name__ in ['str', 'unicode']:
-			lib_name = lib_var
-		else:
-			lib_name = lib_var.get()
-		if lib_name == '' or lib_name in self.libraries:
-			return
-		self.library_dictionary[lib_name] = {'files': fastq_files[:]}
-		self.libraries.append(lib_name)
-
-		# zero index and skip the '(Select)' item
-		length = len(self.library_dictionary) - 1 - 1
-		frame = Frame(self.library_frame, bg='white', padx=5, pady=5)
-		inner_frame = Frame(frame, padx=2, pady=2)
-		template = StringVar()
-		enter_template = Entry(inner_frame, textvariable=template)
-
-		self.library_dictionary[lib_name]['template'] = template
-		frame.library = lib_name
-		Label(inner_frame, text=lib_name).grid(row=0, column=1)
-		Button(inner_frame, text='Remove', command=lambda: self.remove_frame(
-			frame, lib_name)).grid(row=0, column=2, padx=2, pady=2)
-		Label(inner_frame, text='Template ID: ').grid(column=0, row=1)
-		enter_template.grid(row=1, column=1, columnspan=2, sticky='ew')
-		ttk.Separator(inner_frame, orient=HORIZONTAL).grid(
-			row=2, column=0, columnspan=3, sticky='ew')
-		Grid.columnconfigure(inner_frame, 0, weight=1)
-		Grid.columnconfigure(inner_frame, 1, weight=1)
-		Grid.columnconfigure(inner_frame, 2, weight=1)
-
-		inner_frame.pack(side=TOP, fill=BOTH)
-		frame.grid(row=int(length / 3), column=length %
-				   3, ipadx=5, ipady=5, sticky='news')
-
-		for i, dropdown in enumerate(self.library_selection_menus):
-			dropdown['menu'].add_command(label=lib_name,
-										 command=lambda index=i: \
-										 self.selected_index_changed(index,
-											lib_name))
-		if type(lib_var).__name__ not in ['str', 'unicode']:
-			lib_var.set('')
-
-		def binder(widget):
-			for child in widget.winfo_children():
-				binder(child)
-
-			widget.bind('<Button-4>', self.scroll)
-			widget.bind('<Button-5>', self.scroll)
-
-		binder(frame)
-
-		try:
-			self.add_library_entry.focus()
-		except AttributeError:
-			pass
-
-	def remove_frame(self, frame, library, force_delete = False):
-		if library in self.db_libraries and not force_delete:
-			if not messagebox.askokcancel('Warning', 'Are you sure you want'+
-				' to remove' + library + ' from your libraries? All alignment'+
-				' data will be' + ' lost.\nYou can undo this action by' +
-				' clicking the Reset' + ' button before you align.'):
-				return
-		frame.destroy()
-		list = self.library_dictionary[library]['files']
-		del self.library_dictionary[library]
-
-		for dropdown in self.library_selection_menus:
-			index = self.libraries.index(library)
-			dropdown['menu'].delete(index, index)
-		for file in list:
-			for FASTQ_file_index, FASTQ_file in enumerate(self.fastq_files):
-				if FASTQ_file.name == file:
-					index = FASTQ_file_index
-					break
-			self.library_selection_menus[index].selected_lib.set('')
-		self.libraries.remove(library)
 
 	def add_method(self, method):
 		"""Adds a box for the selected method"""
@@ -396,10 +287,3 @@ class Alignment_Tab(Tab):
 				try:
 					widget['state'] = DISABLED
 				except:pass
-
-	def set_is_complement(self, index):
-
-		if self.fastq_file_complement_values[index].get() == 1:
-			self.fastq_files[index].is_reverse_complement = True
-		else:
-			self.fastq_files[index].is_reverse_complement = False
