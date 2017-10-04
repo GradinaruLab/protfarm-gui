@@ -49,7 +49,7 @@ class Analysis_Tab(Tab):
             relief=GROOVE, bd=2)
 
         # 1 - Starting library
-        Label(self.enrichment_frame, text='Starting Library').grid(row=0, column=0,
+        Label(self.enrichment_frame, text='Starting Sample').grid(row=0, column=0,
             sticky='nw', padx=5, pady=5)
         var = StringVar()
         self.library_list = [library.name for library in db.get_libraries()]
@@ -76,24 +76,24 @@ class Analysis_Tab(Tab):
         self.libraries_of_interest.bind('<Button-5>', self.scroll)
 
         # 2 - Libraries of interest
-        lab = Label(self.enrichment_frame, text='Libraries of Interest ')
+        lab = Label(self.enrichment_frame, text='Samples of Interest ')
         lab.grid(row=1, column=0, sticky='nw', padx=5, pady=5)
 
         Grid.columnconfigure(self.enrichment_frame, 1, weight=1)
 
-        browse_button = Button(self.enrichment_frame, text='Browse \nLibraries',
+        browse_button = Button(self.enrichment_frame, text='Browse \nSamples',
             command=lambda: self.display_libraries([self.libraries_of_interest]))
         browse_button.grid(row=1, column=0, sticky='s')
 
         self.enrichment_frame.grid(row=1, column=0, sticky='news', pady=5, padx=5)
 
         # 3 - Specificity
-        lab = Label(self.specificity_frame, text='Libraries to Compare')
+        lab = Label(self.specificity_frame, text='Samples to Compare')
         lab.grid(row=0, column=0, sticky='nws', padx=5, pady=5)
 
         Grid.columnconfigure(self.specificity_frame, 1, weight=1)
 
-        browse_button = Button(self.specificity_frame, text = 'Browse \nLibraries',
+        browse_button = Button(self.specificity_frame, text = 'Browse \nSamples',
             command=lambda: self.display_libraries([self.libraries_to_compare]))
         browse_button.grid(row=0, column=0, sticky='s')
 
@@ -215,7 +215,7 @@ class Analysis_Tab(Tab):
         self.plot_amino_acid_property_distribution_btn.pack(side='top', fill='both', padx=5, pady=5)
 
         self.coverage_analysis_btn = \
-            Button(nice_button_wrapper, text='Analyze Library Coverage', \
+            Button(nice_button_wrapper, text='Analyze Coverage', \
                 command = self.analyze_coverage)
         self.coverage_analysis_btn.pack(side='top', fill='both', padx=5, pady = 5)
 
@@ -453,7 +453,7 @@ class Analysis_Tab(Tab):
 
         num_included_sequences, num_possible_sequences = coverage_analysis.get_coverage(self.analysis_set, by_amino_acid = by_amino_acid)
 
-        libraries_included_string = 'Libraries included:\n'
+        libraries_included_string = 'Samples included:\n'
 
         for library_name, library in self.analysis_set.get_libraries().items():
             libraries_included_string += library_name + '\n'
@@ -500,7 +500,7 @@ class Analysis_Tab(Tab):
             include_zero_counts = False
 
         if not (starting_library and libraries_of_interest and libraries_to_compare and threshold):
-            messagebox.showerror('Missing library or threshold - make sure threshold is set and there is a starting library, library of interest, and library to compare to')
+            messagebox.showerror('Missing sample or threshold - make sure threshold is set and there is a starting sample, sample of interest, and sample to compare to')
             return
 
         self.analysis_set.add_library(db.get_library(starting_library))
@@ -516,8 +516,8 @@ class Analysis_Tab(Tab):
             by_amino_acid = by_amino_acid, log_scale = log_scale)
         print('starting',  starting_library)
         print('Threshold', self.count_threshold.get())
-        print('libraries_of_interest', libraries_of_interest)
-        print('libraries_to_compare',libraries_to_compare)
+        print('samples_of_interest', libraries_of_interest)
+        print('samples_to_compare',libraries_to_compare)
 
     def add_to_frame(self, library, frame, destroy = None):
         """
@@ -555,7 +555,7 @@ class Analysis_Tab(Tab):
         listbox = listboxes[0]
 
         self.library_window = Toplevel()
-        self.library_window.title('Libraries')
+        self.library_window.title('Samples')
         w = str(int(self.winfo_screenwidth()*0.4))
         h = str(int(self.winfo_screenheight()*0.5))
         self.library_window.geometry('300x500+0+0')

@@ -34,7 +34,7 @@ class Alignment_Statistics_Tab(Tab):
         self.first_left_frame = Frame(self.left_frame)
         self.second_left_frame = Frame(self.left_frame)
 
-        Label(self.first_left_frame, text = 'Libraries').pack(side=TOP)
+        Label(self.first_left_frame, text = 'Samples').pack(side=TOP)
         Label(self.second_left_frame, text = 'Alignments').pack(side=TOP)
     
         all_libs = StringVar()
