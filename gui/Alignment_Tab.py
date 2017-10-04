@@ -105,12 +105,12 @@ class Alignment_Tab(Tab):
         sample = self._samples[sample_index]
 
         if selected_value == self._template_options[0]:
-            del self._library_templates[sample.id]
+            del self._sample_templates[sample.id]
         else:
-            selected_template_index = self._templates.index(selected_value)
-            selected_template = self._templates[selected_template_index]
+            selected_template_index = self._template_options.index(selected_value)
+            selected_template = self._templates[selected_template_index-1]
 
-            self._library_templates[sample.id] = selected_template.id
+            self._sample_templates[sample.id] = selected_template.id
 
     def load_alignment(self):
 
@@ -181,12 +181,14 @@ class Alignment_Tab(Tab):
 
         # Check if all libraries have been assigned to existing templates
         errors = []
-        for sample in self._samples:
-            if sample.id not in self._sample_templates:
-                errors.append("Missing template for sample '%s'" % sample.name)
-        if errors:
-            self.show_message(errors)
-            return
+
+        if len(self.method_instances) > 0:
+            for sample in self._samples:
+                if sample.id not in self._sample_templates:
+                    errors.append("Missing template for sample '%s'" % sample.name)
+            if errors:
+                self.show_message(errors)
+                return
 
         for instance in self.method_instances:
             if instance['is_enabled'].get() in [0,'0']:
@@ -202,9 +204,6 @@ class Alignment_Tab(Tab):
                 return
 
             alignment = al.Alignment(method, parameters, self._sample_templates)
-        for lib in self.library_dictionary:
-            globals.method_instances = self.method_instances
-            globals.library_dictionary = self.library_dictionary
         try:
             self.go_button["state"] = "disabled"
             Threaded_Aligner(self).start()

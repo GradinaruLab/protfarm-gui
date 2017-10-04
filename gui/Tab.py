@@ -6,6 +6,7 @@ import os
 import threading
 from analysis import heat
 from workspace import Workspace as ws
+from tkinter import messagebox
 
 class Threaded_Aligner(threading.Thread):
   

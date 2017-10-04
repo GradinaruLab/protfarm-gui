@@ -35,8 +35,6 @@ class Application(Frame):
         globals.next_template_seed = int(db.template_db['next_template_id'])
         globals.next_method_seed = int(db.alignment_db['next_alignment_id'])
 
-        globals.library_dictionary = {}
-        globals.method_instances = {}
         self.current_selection = []
         
         if master:
