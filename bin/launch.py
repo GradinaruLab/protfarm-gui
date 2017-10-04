@@ -80,7 +80,7 @@ screen_height = root.winfo_screenheight()
 
 root.geometry("%sx%s" % (screen_width, screen_height))
 
-root.wm_title('CLOVERbot')
+root.wm_title('VirusFarm')
 
 if len(sys.argv) > 1:
     directory = sys.argv[1]
