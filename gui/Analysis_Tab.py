@@ -513,7 +513,9 @@ class Analysis_Tab(Tab):
         filename = 'analysis.csv'
         self.analysis_set.export_enrichment_specificity(filename,
             starting_library, libraries_to_compare, count_threshold = threshold,
-            by_amino_acid = by_amino_acid, log_scale = log_scale)
+            by_amino_acid = by_amino_acid, log_scale = log_scale, \
+            include_zero_count = include_zero_counts, \
+            zero_count_magic_number = zero_count_default_value)
         print('starting',  starting_library)
         print('Threshold', self.count_threshold.get())
         print('samples_of_interest', libraries_of_interest)
