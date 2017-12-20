@@ -469,6 +469,11 @@ class Analysis_Tab(Tab):
         starting_library = self.starting_library_dd.var.get()
         libraries_of_interest = [str(line.name) for line in self.libraries_of_interest.winfo_children()]
         libraries_to_compare = [str(line.name) for line in self.libraries_to_compare.winfo_children()]
+
+        if len(libraries_of_interest) == 0:
+            libraries_of_interest = None
+        if len(libraries_to_compare) == 0:
+            libraries_to_compare = None
         
         try:
             threshold = int(self.count_threshold.get().strip())
@@ -499,16 +504,19 @@ class Analysis_Tab(Tab):
         except:
             include_zero_counts = False
 
-        if not (starting_library and libraries_of_interest and libraries_to_compare and threshold):
-            messagebox.showerror('Missing sample or threshold - make sure threshold is set and there is a starting sample, sample of interest, and sample to compare to')
+        if not (libraries_of_interest and threshold):
+            messagebox.showerror('Missing sample or threshold - make sure threshold is set and there is a sample of interest')
             return
 
-        self.analysis_set.add_library(db.get_library(starting_library))
+        if starting_library:
+            self.analysis_set.add_library(db.get_library(starting_library))
         
         for library in libraries_of_interest:
             self.analysis_set.add_library(db.get_library(library))
-        for library in libraries_to_compare:
-            self.analysis_set.add_library(db.get_library(library))
+
+        if libraries_to_compare:
+            for library in libraries_to_compare:
+                self.analysis_set.add_library(db.get_library(library))
 
         filename = 'analysis.csv'
         self.analysis_set.export_enrichment_specificity(filename,
