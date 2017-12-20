@@ -47,6 +47,9 @@ class Sample_Tab(Tab):
         self._sample_list_frame = Frame(self._existing_samples_frame)
         self._sample_list_frame.pack()
 
+        self._sample_scroll_area = self.scroll_area(self._sample_list_frame, \
+            height=self.winfo_toplevel().winfo_height())
+
         sample_index = 0
 
         self._sample_labels = []
@@ -55,15 +58,15 @@ class Sample_Tab(Tab):
 
         for sample in self._samples:
 
-            label = Label(self._sample_list_frame, text=sample.name)
+            label = Label(self._sample_scroll_area, text=sample.name)
             label.grid(row = sample_index, column = 0)
 
-            rename_button = Button(self._sample_list_frame, text="Rename", \
+            rename_button = Button(self._sample_scroll_area, text="Rename", \
                 command=lambda index=sample_index: \
                 self.rename_sample_clicked(index))
             rename_button.grid(row = sample_index, column=1, sticky="news")
 
-            delete_button = Button(self._sample_list_frame, text="Delete", \
+            delete_button = Button(self._sample_scroll_area, text="Delete", \
                 command=lambda index=sample_index: \
                 self.delete_sample_clicked(index))
             delete_button.grid(row = sample_index, column=2, sticky="news")
