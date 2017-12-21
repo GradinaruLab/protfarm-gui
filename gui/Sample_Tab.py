@@ -13,13 +13,16 @@ class Sample_Tab(Tab):
         self._samples_frame = Frame(self)
         self._samples_frame.place(relwidth=0.5, relheight=1.0, relx=0.0, rely=0.0)
 
-        self._existing_samples_frame = Frame(self._samples_frame)
-        self._existing_samples_frame.pack(side=TOP)
+        self._new_sample_frame = Frame(self._samples_frame)
+        self._new_sample_frame.pack(side=TOP)
 
-        self._add_sample_button = Button(self._samples_frame, \
+        self._add_sample_button = Button(self._new_sample_frame, \
             text="Add Sample", command=self.add_sample_clicked)
 
         self._add_sample_button.pack(side=TOP)
+
+        self._existing_samples_frame = Frame(self._samples_frame)
+        self._existing_samples_frame.pack(side=TOP)
 
         self._FASTQ_frame = Frame(self)
         self._FASTQ_frame.place(relwidth=0.5, relheight=1.0, relx=0.5, rely=0.0)
@@ -30,7 +33,7 @@ class Sample_Tab(Tab):
         self._FASTQ_files = []
         self._FASTQ_list_frame = None
 
-        self._new_sample_frame = None
+        self._new_sample_fields_frame = None
 
     def reload(self):
 
@@ -48,7 +51,7 @@ class Sample_Tab(Tab):
         self._sample_list_frame.pack()
 
         self._sample_scroll_area = self.scroll_area(self._sample_list_frame, \
-            height=self.winfo_toplevel().winfo_height())
+            height=self.winfo_toplevel().winfo_height() - 200)
 
         sample_index = 0
 
@@ -196,43 +199,37 @@ class Sample_Tab(Tab):
 
     def add_edit_sample(self, sample = None):
 
-        if self._new_sample_frame != None:
-            self._new_sample_frame.destroy()
-
-        self._new_sample_frame = Frame(self._samples_frame)
-        self._new_sample_frame.pack(side=TOP)
-
         self._editing_sample = sample
 
-        new_sample_fields_frame = Frame(self._new_sample_frame)
-        new_sample_fields_frame.pack(side=TOP)
+        if self._new_sample_fields_frame is not None:
+            self._new_sample_fields_frame.destroy()
+
+        self._new_sample_fields_frame = Frame(self._new_sample_frame)
+        self._new_sample_fields_frame.pack(side=TOP)
 
         self._sample_edit_name = StringVar()
-        Label(new_sample_fields_frame, text="Name")\
+        Label(self._new_sample_fields_frame, text="Name")\
             .grid(row=0, column=0)
 
-        Entry(new_sample_fields_frame, \
+        Entry(self._new_sample_fields_frame, \
             textvariable=self._sample_edit_name)\
             .grid(row=0, column=1)
 
         if sample != None:
             self._sample_edit_name.set(sample.name)
 
-        done_close_frame = Frame(self._new_sample_frame)
-        done_close_frame.pack(side=TOP)
-
         if sample != None:
             done_button_text = "Update"
         else:
             done_button_text = "Add"
 
-        Button(done_close_frame, text=done_button_text,
+        Button(self._new_sample_fields_frame, text=done_button_text,
             command=lambda sample=sample: self.add_update_clicked(sample))\
-            .grid(row=0,column=0)
+            .grid(row=1,column=0)
 
-        Button(done_close_frame, text="Cancel",
-            command=self._new_sample_frame.destroy)\
-            .grid(row=0,column=1)
+        Button(self._new_sample_fields_frame, text="Cancel",
+            command=self._new_sample_fields_frame.destroy)\
+            .grid(row=1,column=1)
 
     def add_update_clicked(self, sample):
 
@@ -247,7 +244,7 @@ class Sample_Tab(Tab):
             else:
                 sample.name = sample_name
 
-            self._new_sample_frame.destroy()
+            self._new_sample_fields_frame.destroy()
 
             self.reload()
         except Exception as exception:
