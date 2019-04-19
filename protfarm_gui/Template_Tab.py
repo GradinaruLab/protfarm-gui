@@ -1,7 +1,8 @@
 from .Tab import *
 from tkinter import messagebox
-from workspace import Database as db
-from workspace.Template import Template
+from protfarm.workspace import Database as db
+from protfarm.workspace.Template import Template
+
 
 class Template_Tab(Tab):
 

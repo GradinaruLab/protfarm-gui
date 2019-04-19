@@ -10,12 +10,13 @@ from . import globals
 import re
 import numpy as np
 from decimal import *
-from workspace import Workspace as ws
-from workspace import Library as lb
-from workspace import Template as tp
-from workspace import Alignment as al
-from workspace import Database as db
+from protfarm.workspace import Workspace as ws
+from protfarm.workspace import Library as lb
+from protfarm.workspace import Template as tp
+from protfarm.workspace import Alignment as al
+from protfarm.workspace import Database as db
 from .Tab import *
+
 
 class Alignment_Statistics_Tab(Tab):
     """Instant of the analysis tab"""

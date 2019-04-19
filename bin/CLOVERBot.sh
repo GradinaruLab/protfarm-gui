@@ -1,1 +1,1 @@
-python3 /Users/CLOVER1/VirusFarm/launch.py
+python3 ../protfarm_gui/launch.py

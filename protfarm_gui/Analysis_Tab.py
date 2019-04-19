@@ -1,30 +1,16 @@
-from tkinter import *
-from tkinter import messagebox
-import sys
-import glob
-import os
-import threading
-from analysis import heat
-from . import methods
-from . import globals
-import re
-import numpy as np
-from analysis.Analysis_Set import Analysis_Set
-from workspace import Workspace as ws
-from workspace import Library as lb
-from workspace import Template as tp
-from workspace import Alignment as al
-from workspace import Database as db
-from analysis import enrichment as enrichment_analysis
-from analysis import amino_acids as amino_acid_analysis
-from analysis import coverage as coverage_analysis
-from ml import feature_analysis
+from pepars.analysis import heat
+from protfarm.analysis.Analysis_Set import Analysis_Set
+from protfarm.workspace import Database as db
+from pepars.analysis import enrichment as enrichment_analysis
+from pepars.analysis import amino_acids as amino_acid_analysis
+from protfarm.analysis import coverage as coverage_analysis
+from pepars.utils.AminoAcid import AminoAcid
+# from ml import feature_analysis
 from .Tab import *
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
 import seaborn as sns
-from utils.AminoAcid import AminoAcid
 
 from multiprocessing import Process
 

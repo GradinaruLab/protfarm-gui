@@ -1,8 +1,9 @@
 from .Tab import *
 from tkinter import messagebox
-from workspace import Database as db
-from workspace.Library import Library
+from protfarm.workspace import Database as db
+from protfarm.workspace.Library import Library
 from functools import partial
+
 
 class Sample_Tab(Tab):
 

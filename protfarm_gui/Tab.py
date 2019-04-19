@@ -1,12 +1,8 @@
 from tkinter import *
 from tkinter import font
-import sys
-import glob
-import os
-import threading
-from analysis import heat
-from workspace import Workspace as ws
 from tkinter import messagebox
+import threading
+from protfarm.workspace import Workspace as ws
 
 class Threaded_Aligner(threading.Thread):
   

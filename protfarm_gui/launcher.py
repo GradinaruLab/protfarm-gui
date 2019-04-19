@@ -1,23 +1,12 @@
-from tkinter import *
-import tkinter.filedialog
 from tkinter import ttk
-from tkinter import font
-import sys
-import glob
-import os
-from analysis import heat
-from gui import methods
-from gui import globals
-from gui.Template_Tab import *
-from gui.Sample_Tab import *
-from gui.Alignment_Tab import *
-from gui.Analysis_Tab import *
-from gui.Alignment_Statistics_Tab import *
-from workspace import Workspace as ws
-from workspace import Library as lb
-from workspace import Template as tp
-from workspace import Alignment as al
-from workspace import Database as db
+from tkinter import filedialog
+from .Template_Tab import *
+from .Sample_Tab import *
+from .Alignment_Tab import *
+from .Analysis_Tab import *
+from .Alignment_Statistics_Tab import *
+from protfarm.workspace import Workspace as ws
+from protfarm.workspace import Database as db
 
 
 class Application(Frame):
@@ -71,29 +60,35 @@ class Application(Frame):
             except AttributeError:
                 pass
 
-root = Tk()
 
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
+def launch():
+    root = Tk()
 
-root.geometry("%sx%s" % (screen_width, screen_height))
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
 
-root.wm_title('VirusFarm')
+    root.geometry("%sx%s" % (screen_width, screen_height))
 
-if len(sys.argv) > 1:
-    directory = sys.argv[1]
-else:
-    directory = filedialog.askdirectory()
+    root.wm_title('ProtFarm')
 
-if directory:
-    ws.set_workspace_path(directory)
-    app = Application(master=root)
+    if len(sys.argv) > 1:
+        directory = sys.argv[1]
+    else:
+        directory = filedialog.askdirectory()
 
-    root.update()
+    if directory:
+        ws.set_workspace_path(directory)
+        app = Application(master=root)
 
-    def on_closing():
-        if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            root.destroy()
+        root.update()
 
-    root.protocol("WM_DELETE_WINDOW", on_closing)
-    app.mainloop()
+        def on_closing():
+            if messagebox.askokcancel("Quit", "Do you want to quit?"):
+                root.destroy()
+
+        root.protocol("WM_DELETE_WINDOW", on_closing)
+        app.mainloop()
+
+
+if __name__ == "__main__":
+    launch()

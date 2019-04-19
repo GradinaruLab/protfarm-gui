@@ -10,11 +10,11 @@ from . import methods
 from . import globals
 import re
 import numpy as np
-from workspace import Workspace as ws
-from workspace import Library as lb
-from workspace import Template as tp
-from workspace import Alignment as al
-from workspace import Database as db
+from protfarm.workspace import Workspace as ws
+from protfarm.workspace import Library as lb
+from protfarm.workspace import Template as tp
+from protfarm.workspace import Alignment as al
+from protfarm.workspace import Database as db
 from .Tab import *
 from functools import partial
 
