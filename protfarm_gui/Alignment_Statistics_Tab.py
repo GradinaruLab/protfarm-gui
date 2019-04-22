@@ -1,19 +1,4 @@
-from tkinter import *
-from tkinter import font
-import sys
-import glob
-import os
-import threading
-from analysis import heat
-from . import methods
-from . import globals
-import re
-import numpy as np
 from decimal import *
-from protfarm.workspace import Workspace as ws
-from protfarm.workspace import Library as lb
-from protfarm.workspace import Template as tp
-from protfarm.workspace import Alignment as al
 from protfarm.workspace import Database as db
 from .Tab import *
 
